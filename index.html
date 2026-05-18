@@ -27,48 +27,72 @@ const STRAVA_CLIENT_SECRET = "27e97d01183fc2bfc089b587dc32ca82f8c203aa";
 const STRAVA_REDIRECT_URI  = "https://dmjetley.github.io/apex-training/";
 const STRAVA_SCOPE         = "activity:read_all";
 
-const StravaAuth = {
-getTokens() { try { return JSON.parse(localStorage.getItem(“stravaTokens”)||“null”); } catch { return null; } },
-saveTokens(d) { localStorage.setItem(“stravaTokens”, JSON.stringify({ accessToken:d.access_token, refreshToken:d.refresh_token, expiresAt:d.expires_at, athlete:d.athlete })); },
-clearTokens() { localStorage.removeItem(“stravaTokens”); },
-isExpired() { const t=this.getTokens(); return !t || Date.now()/1000 > t.expiresAt-300; },
-async refreshIfNeeded() {
-if (!this.isExpired()) return this.getTokens().accessToken;
-const t = this.getTokens();
-if (!t||!t.refreshToken) return null;
-try {
-const res = await fetch(“https://www.strava.com/oauth/token”, { method:“POST”, headers:{“Content-Type”:“application/json”}, body:JSON.stringify({ client_id:STRAVA_CLIENT_ID, client_secret:STRAVA_CLIENT_SECRET, refresh_token:t.refreshToken, grant_type:“refresh_token” }) });
-const d = await res.json();
-if (d.access_token) { this.saveTokens(d); return d.access_token; }
-} catch(e) { console.error(e); }
+var StravaAuth = {
+getTokens: function() {
+try { return JSON.parse(localStorage.getItem(“stravaTokens”)||“null”); } catch(e) { return null; }
+},
+saveTokens: function(d) {
+localStorage.setItem(“stravaTokens”, JSON.stringify({
+accessToken: d.access_token, refreshToken: d.refresh_token,
+expiresAt: d.expires_at, athlete: d.athlete
+}));
+},
+clearTokens: function() { localStorage.removeItem(“stravaTokens”); },
+isExpired: function() {
+var t = this.getTokens();
+return !t || Date.now()/1000 > t.expiresAt - 300;
+},
+refreshIfNeeded: function() {
+if (!this.isExpired()) return Promise.resolve(this.getTokens().accessToken);
+var t = this.getTokens();
+if (!t || !t.refreshToken) return Promise.resolve(null);
+return fetch(“https://www.strava.com/oauth/token”, {
+method: “POST”,
+headers: {“Content-Type”: “application/json”},
+body: JSON.stringify({client_id: STRAVA_CLIENT_ID, client_secret: STRAVA_CLIENT_SECRET,
+refresh_token: t.refreshToken, grant_type: “refresh_token”})
+}).then(function(r) { return r.json(); }).then(function(d) {
+if (d.access_token) { StravaAuth.saveTokens(d); return d.access_token; }
 return null;
+}).catch(function() { return null; });
 },
-async fetchActivities(after) {
-const token = await this.refreshIfNeeded();
+fetchActivities: function(after) {
+return StravaAuth.refreshIfNeeded().then(function(token) {
 if (!token) return [];
-try {
-const res = await fetch(“https://www.strava.com/api/v3/athlete/activities?per_page=50&after=”+after, { headers:{ Authorization:“Bearer “+token } });
-const d = await res.json();
-return Array.isArray(d) ? d : [];
-} catch(e) { return []; }
+return fetch(“https://www.strava.com/api/v3/athlete/activities?per_page=50&after=”+after,
+{headers: {Authorization: “Bearer “+token}})
+.then(function(r) { return r.json(); })
+.then(function(d) { return Array.isArray(d) ? d : []; })
+.catch(function() { return []; });
+});
 },
-startOAuth() {
-const p = new URLSearchParams({ client_id:STRAVA_CLIENT_ID, redirect_uri:STRAVA_REDIRECT_URI, response_type:“code”, approval_prompt:“auto”, scope:STRAVA_SCOPE });
+startOAuth: function() {
+var p = new URLSearchParams({client_id: STRAVA_CLIENT_ID, redirect_uri: STRAVA_REDIRECT_URI,
+response_type: “code”, approval_prompt: “auto”, scope: STRAVA_SCOPE});
 window.location.href = “https://www.strava.com/oauth/authorize?”+p;
 },
-async handleCallback(code) {
-const res = await fetch(“https://www.strava.com/oauth/token”, { method:“POST”, headers:{“Content-Type”:“application/json”}, body:JSON.stringify({ client_id:STRAVA_CLIENT_ID, client_secret:STRAVA_CLIENT_SECRET, code, grant_type:“authorization_code” }) });
-const d = await res.json();
-if (d.access_token) { this.saveTokens(d); return true; }
+handleCallback: function(code) {
+return fetch(“https://www.strava.com/oauth/token”, {
+method: “POST”,
+headers: {“Content-Type”: “application/json”},
+body: JSON.stringify({client_id: STRAVA_CLIENT_ID, client_secret: STRAVA_CLIENT_SECRET,
+code: code, grant_type: “authorization_code”})
+}).then(function(r) { return r.json(); }).then(function(d) {
+if (d.access_token) { StravaAuth.saveTokens(d); return true; }
 return false;
-},
+});
+}
 };
 
-(async () => {
-const p = new URLSearchParams(window.location.search);
-const code = p.get(“code”);
+(function() {
+var p = new URLSearchParams(window.location.search);
+var code = p.get(“code”);
 if (p.get(“error”)) { window.history.replaceState({}, “”, STRAVA_REDIRECT_URI); return; }
-if (code) { await StravaAuth.handleCallback(code); window.location.replace(STRAVA_REDIRECT_URI); }
+if (code) {
+StravaAuth.handleCallback(code).then(function() {
+window.location.replace(STRAVA_REDIRECT_URI);
+});
+}
 })();
 </script>
 
