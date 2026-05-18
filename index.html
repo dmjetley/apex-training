@@ -13,19 +13,19 @@
 </head>
 <body style="margin:0;padding:0;background:#080809;">
 <div id="root"><div style="display:flex;align-items:center;justify-content:center;height:100vh;color:#5a5a64;font-family:monospace;font-size:13px;">Loading...</div></div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
 <script>
-if (typeof React === 'undefined') {
-  document.getElementById('root').innerHTML = '<div style="padding:30px;color:#f87171;font-family:monospace;background:#080809;min-height:100vh"><div style="font-size:16px;margin-bottom:8px">⚠ Failed to load React</div><div style="font-size:12px;color:#9898a3">Check your internet connection and reload.</div></div>';
-}
+window.onerror=function(msg,src,line){
+  document.getElementById('root').innerHTML='<div style="padding:30px;font-family:monospace;color:#f87171;background:#080809;min-height:100vh"><b>Error on line '+line+'</b><br><br>'+msg+'</div>';
+  return true;
+};
 </script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script>
-
-const STRAVA_CLIENT_ID     = “247028”;
-const STRAVA_CLIENT_SECRET = “00a9a7ca70c325a2e3a4f06de6a023f1a6fa1491”;
-const STRAVA_REDIRECT_URI  = “https://dmjetley.github.io/apex-training/”;
-const STRAVA_SCOPE         = “activity:read_all”;
+const STRAVA_CLIENT_ID     = "247028";
+const STRAVA_CLIENT_SECRET = "00a9a7ca70c325a2e3a4f06de6a023f1a6fa1491";
+const STRAVA_REDIRECT_URI  = "https://dmjetley.github.io/apex-training/";
+const STRAVA_SCOPE         = "activity:read_all";
 
 const StravaAuth = {
 getTokens() { try { return JSON.parse(localStorage.getItem(“stravaTokens”)||“null”); } catch { return null; } },
@@ -73,119 +73,106 @@ if (code) { await StravaAuth.handleCallback(code); window.location.replace(STRAV
 
 </script>
 <script>
-const { useState, useReducer, useMemo, useEffect } = React;
-
-// ─── COLOR HELPER (replaces color-mix for Safari compat) ─────────────────────
-function hexAlpha(hex, alpha) {
-if (!hex || hex.startsWith(‘var(’)) {
-return ‘rgba(128,128,128,’ + alpha + ‘)’;
-}
-// Handle named css vars that slipped through
-const map = {
-‘#38bdf8’: [56,189,248], ‘#fbbf24’: [251,191,36], ‘#e2ff5d’: [226,255,93],
-‘#fb923c’: [251,146,60], ‘#a78bfa’: [167,139,250], ‘#f472b6’: [244,114,182],
-‘#60a5fa’: [96,165,250], ‘#f87171’: [248,113,113], ‘#4ade80’: [74,222,128],
-‘#d6ff4b’: [214,255,75], ‘#fc4c02’: [252,76,2],
-};
-const rgb = map[hex];
-if (rgb) return ‘rgba(’ + rgb[0] + ‘,’ + rgb[1] + ‘,’ + rgb[2] + ‘,’ + alpha + ‘)’;
-return ‘rgba(128,128,128,’ + alpha + ‘)’;
-}
+var useState=React.useState,useReducer=React.useReducer,useMemo=React.useMemo;
 
 function StravaPanel() {
-const [tokens, setTokens] = React.useState(() => StravaAuth.getTokens());
-const [syncing, setSyncing] = React.useState(false);
-const [lastSync, setLastSync] = React.useState(() => localStorage.getItem(“stravaLastSync”) || null);
-const [syncMsg, setSyncMsg] = React.useState(””);
-const connected = !!(tokens && tokens.accessToken);
-const athlete = tokens && tokens.athlete;
-
-async function sync() {
+var _s1 = React.useState(function(){ return StravaAuth.getTokens(); });
+var tokens = _s1[0], setTokens = _s1[1];
+var _s2 = React.useState(false);
+var syncing = _s2[0], setSyncing = _s2[1];
+var _s3 = React.useState(function(){ return localStorage.getItem(“stravaLastSync”)||null; });
+var lastSync = _s3[0], setLastSync = _s3[1];
+var _s4 = React.useState(””);
+var syncMsg = _s4[0], setSyncMsg = _s4[1];
+var connected = !!(tokens && tokens.accessToken);
+var athlete = tokens && tokens.athlete;
+var orange = “#fc4c02”;
+function sync() {
 setSyncing(true); setSyncMsg(“Fetching activities…”);
-const after = Math.floor(new Date(“2026-06-08”).getTime() / 1000);
-const activities = await StravaAuth.fetchActivities(after);
-const runs = activities.filter(a => a.type === “Run” || a.sport_type === “Run”);
-const PROG = new Date(“2026-06-08”), MS_W = 7*24*3600*1000;
-let imported = 0;
-runs.forEach(act => {
-const d = new Date(act.start_date_local);
-const tw = Math.max(1, Math.floor((d - PROG) / MS_W) + 1);
-const key = “w” + tw;
-const dow = d.getDay();
-const sid = dow===0?“Q1”:dow===4?“Q2”:dow===2?“easy”:dow===6?“easy2”:null;
-if (!sid) return;
-const distMi = Math.round((act.distance/1609.34)*10)/10;
-const spm = act.moving_time/(act.distance/1609.34);
-const pace = Math.floor(spm/60)+”:”+String(Math.round(spm%60)).padStart(2,“0”);
-const existing = JSON.parse(localStorage.getItem(“runLogs5”)||”{}”);
-if (!existing[key]) existing[key]={};
-if (!existing[key][sid]||!existing[key][sid].stravaId) {
-existing[key][sid]={completed:true,date:d.toLocaleDateString(“en-CA”),distance:distMi,actualPace:pace,stravaId:act.id,feel:null,note:‘Strava: “’+act.name+’”’};
+var after = Math.floor(new Date(“2026-06-08”).getTime()/1000);
+StravaAuth.fetchActivities(after).then(function(activities) {
+var runs = activities.filter(function(a){ return a.type===“Run”||a.sport_type===“Run”; });
+var PROG = new Date(“2026-06-08”), MSW = 7*24*3600*1000, imported=0;
+runs.forEach(function(act){
+var d=new Date(act.start_date_local);
+var tw=Math.max(1,Math.floor((d-PROG)/MSW)+1);
+var key=“w”+tw, dow=d.getDay();
+var sid=dow===0?“Q1”:dow===4?“Q2”:dow===2?“easy”:dow===6?“easy2”:null;
+if(!sid) return;
+var dist=Math.round((act.distance/1609.34)*10)/10;
+var spm=act.moving_time/(act.distance/1609.34);
+var pace=Math.floor(spm/60)+”:”+String(Math.round(spm%60)).padStart(2,“0”);
+var ex=JSON.parse(localStorage.getItem(“runLogs5”)||”{}”);
+if(!ex[key]) ex[key]={};
+if(!ex[key][sid]||!ex[key][sid].stravaId){
+ex[key][sid]={completed:true,date:d.toLocaleDateString(“en-CA”),distance:dist,actualPace:pace,stravaId:act.id,feel:null,note:‘Strava: “’+act.name+’”’};
 imported++;
 }
-localStorage.setItem(“runLogs5”, JSON.stringify(existing));
+localStorage.setItem(“runLogs5”,JSON.stringify(ex));
 });
-const now = new Date().toLocaleString();
-localStorage.setItem(“stravaLastSync”, now);
+var now=new Date().toLocaleString();
+localStorage.setItem(“stravaLastSync”,now);
 setLastSync(now); setSyncing(false);
-setSyncMsg(“Done — “+imported+” new runs imported. Reload to see them.”);
+setSyncMsg(“Done - “+imported+” new runs imported. Reload to see them.”);
+});
 }
-
-const orange=”#fc4c02”;
-const sIcon = React.createElement(“svg”,{width:18,height:18,viewBox:“0 0 24 24”,fill:“white”},React.createElement(“path”,{d:“M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169”}));
-
-return React.createElement(“div”,{style:{background:”#141009”,border:“1px solid rgba(252,76,2,0.20)”,borderRadius:14,padding:16,marginBottom:12}},
+var sIcon=React.createElement(“svg”,{width:18,height:18,viewBox:“0 0 24 24”,fill:“white”},React.createElement(“path”,{d:“M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169”}));
+return React.createElement(“div”,{style:{background:“rgba(252,76,2,0.06)”,border:“1px solid rgba(252,76,2,0.2)”,borderRadius:14,padding:16,marginBottom:12}},
 React.createElement(“div”,{style:{fontSize:10,fontWeight:700,letterSpacing:“0.12em”,textTransform:“uppercase”,color:”#5a5a64”,marginBottom:10}},“Strava”),
 connected
 ? React.createElement(“div”,null,
 React.createElement(“div”,{style:{display:“flex”,alignItems:“center”,gap:10,marginBottom:12}},
 React.createElement(“div”,{style:{width:36,height:36,borderRadius:“50%”,background:orange,display:“flex”,alignItems:“center”,justifyContent:“center”}},sIcon),
 React.createElement(“div”,null,
-React.createElement(“div”,{style:{fontSize:13,fontWeight:700,color:”#f0f0f2”}},“Connected”+(athlete?” · “+athlete.firstname:””)),
-lastSync&&React.createElement(“div”,{style:{fontSize:11,color:”#5a5a64”}},“Last sync: “+lastSync)
+React.createElement(“div”,{style:{fontSize:13,fontWeight:700,color:”#f0f0f2”}},“Connected”+(athlete?” - “+athlete.firstname:””)),
+lastSync?React.createElement(“div”,{style:{fontSize:11,color:”#5a5a64”}},“Last sync: “+lastSync):null
 )
 ),
-syncMsg&&React.createElement(“div”,{style:{fontSize:12,color:”#9898a3”,marginBottom:10,lineHeight:1.6}},syncMsg),
-React.createElement(“div”,{style:{display:“flex”,gap:8,flexWrap:“wrap”}},
-React.createElement(“button”,{onClick:sync,disabled:syncing,style:{display:“inline-flex”,alignItems:“center”,gap:6,padding:“9px 16px”,borderRadius:10,fontSize:12,fontWeight:600,background:orange,color:”#fff”,border:“none”,cursor:syncing?“default”:“pointer”,opacity:syncing?0.6:1,fontFamily:“Syne,sans-serif”}},syncing?“Syncing…”:“Sync Runs”),
-React.createElement(“button”,{onClick:()=>{StravaAuth.clearTokens();setTokens(null);setSyncMsg(””);},style:{display:“inline-flex”,alignItems:“center”,gap:6,padding:“9px 16px”,borderRadius:10,fontSize:12,fontWeight:600,background:“transparent”,color:”#9898a3”,border:“1px solid #2c2c31”,cursor:“pointer”,fontFamily:“Syne,sans-serif”}},“Disconnect”)
+syncMsg?React.createElement(“div”,{style:{fontSize:12,color:”#9898a3”,marginBottom:10,lineHeight:1.6}},syncMsg):null,
+React.createElement(“div”,{style:{display:“flex”,gap:8}},
+React.createElement(“button”,{onClick:sync,disabled:syncing,style:{padding:“9px 16px”,borderRadius:10,fontSize:12,fontWeight:600,background:orange,color:”#fff”,border:“none”,cursor:“pointer”,fontFamily:“Syne,sans-serif”}},syncing?“Syncing…”:“Sync Runs”),
+React.createElement(“button”,{onClick:function(){StravaAuth.clearTokens();setTokens(null);},style:{padding:“9px 16px”,borderRadius:10,fontSize:12,fontWeight:600,background:“transparent”,color:”#9898a3”,border:“1px solid #2c2c31”,cursor:“pointer”,fontFamily:“Syne,sans-serif”}},“Disconnect”)
 )
 )
 : React.createElement(“div”,null,
-React.createElement(“div”,{style:{fontSize:12,color:”#9898a3”,marginBottom:12,lineHeight:1.7}},“Connect Strava to auto-import completed runs. Distance and pace are matched to your program weeks automatically.”),
-React.createElement(“button”,{onClick:()=>StravaAuth.startOAuth(),style:{display:“inline-flex”,alignItems:“center”,gap:8,padding:“10px 18px”,borderRadius:10,fontSize:13,fontWeight:600,background:orange,color:”#fff”,border:“none”,cursor:“pointer”,fontFamily:“Syne,sans-serif”}},sIcon,“Connect Strava”)
+React.createElement(“div”,{style:{fontSize:12,color:”#9898a3”,marginBottom:12,lineHeight:1.7}},“Connect Strava to auto-import your runs.”),
+React.createElement(“button”,{onClick:function(){StravaAuth.startOAuth();},style:{display:“inline-flex”,alignItems:“center”,gap:8,padding:“10px 18px”,borderRadius:10,fontSize:13,fontWeight:600,background:orange,color:”#fff”,border:“none”,cursor:“pointer”,fontFamily:“Syne,sans-serif”}},sIcon,” Connect Strava”)
 )
 );
 }
-
-const _OrigPageSettings = PageSettings;
-function PageSettingsWithStrava({state,dispatch,setTab}) {
+var _OrigPS = PageSettings;
+function PageSettingsWithStrava(props) {
 return React.createElement(“div”,null,
-React.createElement(_OrigPageSettings,{state,dispatch,setTab}),
+React.createElement(_OrigPS,props),
 React.createElement(“div”,{style:{padding:“0 20px 20px”}},React.createElement(StravaPanel,null))
 );
 }
 
 </script>
 <script>
-
-window.onerror = function(msg, src, line, col, err) {
-document.getElementById(‘root’).innerHTML =
-‘<div style="padding:30px;font-family:monospace;color:#f87171;background:#080809;min-height:100vh">’ +
-‘<div style="font-size:18px;margin-bottom:12px">⚠ App Error</div>’ +
-‘<div style="font-size:13px;line-height:1.8;color:#fbbf24">’ + msg + ‘</div>’ +
-’<div style="font-size:11px;color:#5a5a64;margin-top:12px">Line ’ + line + ’ · ’ + src + ‘</div>’ +
-‘</div>’;
-return true;
-};
-
 try {
-const {
-useState,
-useReducer,
-useMemo,
-useEffect
-} = React;
+
+function hexAlpha(hex, alpha) {
+var map = {
+‘#38bdf8’: ‘56,189,248’, ‘#fbbf24’: ‘251,191,36’, ‘#e2ff5d’: ‘226,255,93’,
+‘#fb923c’: ‘251,146,60’, ‘#a78bfa’: ‘167,139,250’, ‘#f472b6’: ‘244,114,182’,
+‘#60a5fa’: ‘96,165,250’, ‘#f87171’: ‘248,113,113’, ‘#4ade80’: ‘74,222,128’,
+‘#d6ff4b’: ‘214,255,75’, ‘#fc4c02’: ‘252,76,2’
+};
+var rgb = map[hex] || ‘128,128,128’;
+return ‘rgba(’ + rgb + ‘,’ + alpha + ‘)’;
+}
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError(“Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.”); }
+function _unsupportedIterableToArray(r, a) { if (r) { if (“string” == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return “Object” === t && r.constructor && (t = r.constructor.name), “Map” === t || “Set” === t ? Array.from(r) : “Arguments” === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : “undefined” != typeof Symbol && r[Symbol.iterator] || r[”@@iterator”]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+const _React = React,
+useState = _React.useState,
+useReducer = _React.useReducer,
+useMemo = _React.useMemo,
+useEffect = _React.useEffect;
 
 // ─── PROGRAM CONFIG ───────────────────────────────────────────────────────────
 const PROGRAM_START = new Date(“2026-06-08”); // Monday June 8 2026
@@ -823,7 +810,8 @@ getTotalMiles: () => 1.5 + 4 + 0.5 + 4 + 1.5 // 11.5
 
 // ─── MILEAGE HELPERS ──────────────────────────────────────────────────────────
 // All run miles are whole positive integers. Long run capped at 18 total miles.
-function wholeMi(n, min = 1) {
+function wholeMi(n) {
+let min = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
 return Math.max(min, Math.round(n));
 }
 
@@ -911,11 +899,9 @@ return toYMD(new Date());
 // ─── BUILD WEEK SCHEDULE ──────────────────────────────────────────────────────
 function buildSchedule(tw) {
 const rwInfo = getRunningWeekInfo(tw);
-const {
-blockNum,
-weekInBlock,
-targetMiles
-} = rwInfo;
+const blockNum = rwInfo.blockNum,
+weekInBlock = rwInfo.weekInBlock,
+targetMiles = rwInfo.targetMiles;
 const def = getWeekDef(blockNum, weekInBlock);
 const start = weekStart(tw);
 const mi = allocateMiles(targetMiles, blockNum, weekInBlock);
@@ -1214,7 +1200,8 @@ e: “🟢”
 
 // ─── STORAGE ──────────────────────────────────────────────────────────────────
 const LS = {
-g: (k, d = null) => {
+g: function (k) {
+let d = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
 try {
 const v = localStorage.getItem(k);
 return v != null ? JSON.parse(v) : d;
@@ -1242,7 +1229,8 @@ return `w${tw}`;
 function checkOverload(logs, exName) {
 const hits = [];
 Object.values(logs).forEach(wk => Object.values(wk).forEach(s => {
-if (s?.[exName]?.sets?.length) hits.push(s[exName]);
+var _s$exName;
+if (s !== null && s !== void 0 && (_s$exName = s[exName]) !== null && _s$exName !== void 0 && (_s$exName = _s$exName.sets) !== null && _s$exName !== void 0 && _s$exName.length) hits.push(s[exName]);
 }));
 hits.sort((a, b) => (a.date || “”).localeCompare(b.date || “”));
 if (hits.length < 2) return null;
@@ -1283,6 +1271,7 @@ viewWeek: a.w
 }
 case “SAVE_LIFT”:
 {
+var _LIFTS$a$session;
 const ll = {
 …s.liftLogs,
 [a.wk]: {
@@ -1292,7 +1281,7 @@ const ll = {
 };
 LS.s(“liftLogs5”, ll);
 const flags = {};
-(LIFTS[a.session]?.exercises || []).forEach(ex => {
+(((_LIFTS$a$session = LIFTS[a.session]) === null || _LIFTS$a$session === void 0 ? void 0 : _LIFTS$a$session.exercises) || []).forEach(ex => {
 const f = checkOverload(ll, ex.name);
 if (f) flags[ex.name] = f;
 });
@@ -1402,7 +1391,9 @@ points: “23 4 23 10 17 10”
 }), /*#**PURE***/React.createElement(“path”, {
 d: “M20.49 15a9 9 0 1 1-2.12-9.36L23 10”
 })),
-check: (s = 16) => /*#**PURE***/React.createElement(“svg”, {
+check: function () {
+let s = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 16;
+return /*#**PURE***/React.createElement(“svg”, {
 width: s,
 height: s,
 viewBox: “0 0 24 24”,
@@ -1411,7 +1402,8 @@ stroke: “currentColor”,
 strokeWidth: “2.5”
 }, /*#**PURE***/React.createElement(“polyline”, {
 points: “20 6 9 17 4 12”
-})),
+}));
+},
 plus: () => /*#**PURE***/React.createElement(“svg”, {
 width: 16,
 height: 16,
@@ -1555,11 +1547,11 @@ d: “M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.
 };
 
 // ─── PRIMITIVES ───────────────────────────────────────────────────────────────
-const Card = ({
-children,
-style,
-onClick
-}) => /*#**PURE***/React.createElement(“div”, {
+const Card = _ref => {
+let children = _ref.children,
+style = _ref.style,
+onClick = _ref.onClick;
+return /*#**PURE***/React.createElement(“div”, {
 onClick: onClick,
 style: {
 background: “var(–s1)”,
@@ -1569,11 +1561,13 @@ padding: 16,
 …style
 }
 }, children);
-const Pill = ({
-color = “var(–accent)”,
-children,
-sm
-}) => /*#**PURE***/React.createElement(“span”, {
+};
+const Pill = _ref2 => {
+let _ref2$color = _ref2.color,
+color = _ref2$color === void 0 ? “var(–accent)” : _ref2$color,
+children = _ref2.children,
+sm = _ref2.sm;
+return /*#**PURE***/React.createElement(“span”, {
 style: {
 display: “inline-flex”,
 alignItems: “center”,
@@ -1588,13 +1582,14 @@ letterSpacing: “0.05em”,
 textTransform: “uppercase”
 }
 }, children);
-const Btn = ({
-children,
-onClick,
-v = “primary”,
-style,
-disabled
-}) => {
+};
+const Btn = _ref3 => {
+let children = _ref3.children,
+onClick = _ref3.onClick,
+_ref3$v = _ref3.v,
+v = _ref3$v === void 0 ? “primary” : _ref3$v,
+style = _ref3.style,
+disabled = _ref3.disabled;
 const vs = {
 primary: {
 background: “var(–accent)”,
@@ -1634,9 +1629,9 @@ opacity: disabled ? 0.4 : 1,
 }
 }, children);
 };
-const ST = ({
-c
-}) => /*#**PURE***/React.createElement(“div”, {
+const ST = _ref4 => {
+let c = _ref4.c;
+return /*#**PURE***/React.createElement(“div”, {
 style: {
 fontSize: 10,
 fontWeight: 700,
@@ -1646,10 +1641,11 @@ color: “var(–t3)”,
 marginBottom: 10
 }
 }, c);
-const Row = ({
-children,
-style
-}) => /*#**PURE***/React.createElement(“div”, {
+};
+const Row = _ref5 => {
+let children = _ref5.children,
+style = _ref5.style;
+return /*#**PURE***/React.createElement(“div”, {
 style: {
 display: “flex”,
 alignItems: “center”,
@@ -1657,10 +1653,11 @@ gap: 8,
 …style
 }
 }, children);
-const SB = ({
-children,
-style
-}) => /*#**PURE***/React.createElement(“div”, {
+};
+const SB = _ref6 => {
+let children = _ref6.children,
+style = _ref6.style;
+return /*#**PURE***/React.createElement(“div”, {
 style: {
 display: “flex”,
 alignItems: “center”,
@@ -1668,15 +1665,17 @@ justifyContent: “space-between”,
 …style
 }
 }, children);
-const Mono = ({
-children,
-style
-}) => /*#**PURE***/React.createElement(“span”, {
+};
+const Mono = _ref7 => {
+let children = _ref7.children,
+style = _ref7.style;
+return /*#**PURE***/React.createElement(“span”, {
 style: {
 fontFamily: “var(–mono)”,
 …style
 }
 }, children);
+};
 function typeColor(t) {
 return {
 E: “var(–run)”,
@@ -1687,10 +1686,12 @@ M: “var(–accent)”
 }
 
 // ─── SCIENCE NOTE ─────────────────────────────────────────────────────────────
-function ScienceNote({
-text
-}) {
-const [open, setOpen] = useState(false);
+function ScienceNote(_ref8) {
+let text = _ref8.text;
+const _useState = useState(false),
+_useState2 = _slicedToArray(_useState, 2),
+open = _useState2[0],
+setOpen = _useState2[1];
 return /*#**PURE***/React.createElement(“div”, {
 style: {
 marginBottom: 12
@@ -1729,15 +1730,20 @@ lineHeight: 1.8
 }
 
 // ─── VDOT PROMPT BANNER ───────────────────────────────────────────────────────
-function VdotPrompt({
-vdot,
-blockEndWeek,
-dismissed,
-onDismiss,
-onUpdate
-}) {
-const [newV, setNewV] = useState(vdot + 1);
-const [open, setOpen] = useState(false);
+function VdotPrompt(_ref9) {
+let vdot = _ref9.vdot,
+blockEndWeek = _ref9.blockEndWeek,
+dismissed = _ref9.dismissed,
+onDismiss = _ref9.onDismiss,
+onUpdate = _ref9.onUpdate;
+const _useState3 = useState(vdot + 1),
+_useState4 = _slicedToArray(_useState3, 2),
+newV = _useState4[0],
+setNewV = _useState4[1];
+const _useState5 = useState(false),
+_useState6 = _slicedToArray(_useState5, 2),
+open = _useState6[0],
+setOpen = _useState6[1];
 if (dismissed) return null;
 return /*#**PURE***/React.createElement(“div”, {
 style: {
@@ -1817,30 +1823,42 @@ padding: “8px 14px”
 }
 
 // ─── LIFT LOGGER ──────────────────────────────────────────────────────────────
-function LiftLogger({
-sessionKey,
-weekKey,
-liftLogs,
-targetRir,
-onSave,
-onClose
-}) {
+function LiftLogger(_ref0) {
+var _liftLogs$weekKey;
+let sessionKey = _ref0.sessionKey,
+weekKey = _ref0.weekKey,
+liftLogs = _ref0.liftLogs,
+targetRir = _ref0.targetRir,
+onSave = _ref0.onSave,
+onClose = _ref0.onClose;
 const def = LIFTS[sessionKey];
-const existing = liftLogs[weekKey]?.[sessionKey] || {};
-const [ai, setAi] = useState(0);
-const [exData, setExData] = useState(() => def.exercises.map(ex => ({
+const existing = ((_liftLogs$weekKey = liftLogs[weekKey]) === null || _liftLogs$weekKey === void 0 ? void 0 : _liftLogs$weekKey[sessionKey]) || {};
+const _useState7 = useState(0),
+_useState8 = _slicedToArray(_useState7, 2),
+ai = _useState8[0],
+setAi = _useState8[1];
+const _useState9 = useState(() => def.exercises.map(ex => {
+var _existing$ex$name;
+return {
 name: ex.name,
 repRange: ex.repRange,
 notes: ex.notes,
-sets: existing[ex.name]?.sets || Array.from({
+sets: ((_existing$ex$name = existing[ex.name]) === null || _existing$ex$name === void 0 ? void 0 : _existing$ex$name.sets) || Array.from({
 length: ex.sets
 }, () => ({
 reps: “”,
 weight: “”,
 rir: “”
 }))
-})));
-const [note, setNote] = useState(existing.sessionNote || “”);
+};
+})),
+_useState0 = _slicedToArray(_useState9, 2),
+exData = _useState0[0],
+setExData = _useState0[1];
+const _useState1 = useState(existing.sessionNote || “”),
+_useState10 = _slicedToArray(_useState1, 2),
+note = _useState10[0],
+setNote = *useState10[1];
 const upd = (ei, si, f, v) => setExData(p => p.map((e, i) => i !== ei ? e : {
 …e,
 sets: e.sets.map((s, j) => j !== si ? s : {
@@ -1858,7 +1876,7 @@ rir: “”
 }));
 const rmSet = (ei, si) => setExData(p => p.map((e, i) => i !== ei ? e : {
 …e,
-sets: e.sets.filter((_, j) => j !== si)
+sets: e.sets.filter((*, j) => j !== si)
 }));
 const save = () => {
 const data = {
@@ -1914,8 +1932,8 @@ fontSize: 12
 }
 }, “Close”)), /*#**PURE***/React.createElement(“div”, {
 style: {
-background: hexAlpha(LIFT_INTENSITY_COLOR[Math.ceil(4 - targetRir) || 1] || “#fb923c”,0.12),
-border: `1px solid ${hexAlpha(LIFT_INTENSITY_COLOR[Math.ceil(4 - targetRir) || 1] || "#fb923c",0.25)}`,
+background: hexAlpha(LIFT_INTENSITY_COLOR[Math.ceil(4 - targetRir) || 1] || “var(–lift)”,0.12),
+border: “1px solid “ + hexAlpha(LIFT_INTENSITY_COLOR[Math.ceil(4 - targetRir) || 1] || “var(–lift)”,0.25),
 borderRadius: “var(–r2)”,
 padding: “10px 14px”,
 marginBottom: 12
@@ -1972,7 +1990,7 @@ marginLeft: 4
 }, filled, “/”, e.sets.length));
 })), /*#**PURE***/React.createElement(Card, {
 style: {
-border: `1px solid ${hexAlpha(def.color,0.25)}`,
+border: “1px solid “ + hexAlpha(def.color,0.25),
 marginBottom: 10
 }
 }, /*#**PURE***/React.createElement(SB, {
@@ -2116,27 +2134,37 @@ fontSize: 14
 }
 
 // ─── RUN DETAIL ───────────────────────────────────────────────────────────────
-function RunDetail({
-item,
-weekKey,
-vdot,
-runLogs,
-onSave,
-onClose
-}) {
-const {
-runDef,
-miles
-} = item;
+function RunDetail(_ref1) {
+var _runLogs$weekKey;
+let item = _ref1.item,
+weekKey = _ref1.weekKey,
+vdot = _ref1.vdot,
+runLogs = _ref1.runLogs,
+onSave = _ref1.onSave,
+onClose = _ref1.onClose;
+const runDef = item.runDef,
+miles = item.miles;
 const paces = VDOT_PACES[vdot] || VDOT_PACES[46];
 const segs = runDef.getSegs(paces, miles);
-const existing = runLogs[weekKey]?.[item.id] || {};
+const existing = ((_runLogs$weekKey = runLogs[weekKey]) === null || _runLogs$weekKey === void 0 ? void 0 : _runLogs$weekKey[item.id]) || {};
 const tc = typeColor(runDef.type);
 const segTotal = Math.round(segs.reduce((s, seg) => s + (seg.miles || 0), 0) * 10) / 10;
-const [feel, setFeel] = useState(existing.feel || null);
-const [note, setNote] = useState(existing.note || “”);
-const [ap, setAp] = useState(existing.actualPace || “”);
-const [dist, setDist] = useState(existing.distance || “”);
+const _useState11 = useState(existing.feel || null),
+_useState12 = _slicedToArray(_useState11, 2),
+feel = _useState12[0],
+setFeel = _useState12[1];
+const _useState13 = useState(existing.note || “”),
+_useState14 = _slicedToArray(_useState13, 2),
+note = _useState14[0],
+setNote = _useState14[1];
+const _useState15 = useState(existing.actualPace || “”),
+_useState16 = _slicedToArray(_useState15, 2),
+ap = _useState16[0],
+setAp = _useState16[1];
+const _useState17 = useState(existing.distance || “”),
+_useState18 = _slicedToArray(_useState17, 2),
+dist = _useState18[0],
+setDist = _useState18[1];
 const save = () => onSave({
 feel,
 note,
@@ -2259,7 +2287,7 @@ marginTop: 2
 }, seg.dist, “ \xB7 “, seg.feel))))), /*#**PURE***/React.createElement(Card, {
 style: {
 background: hexAlpha(tc,0.05),
-border: `1px solid ${hexAlpha(tc,0.18)}`,
+border: “1px solid “ + hexAlpha(tc,0.18),
 marginBottom: 12
 }
 }, /*#**PURE***/React.createElement(ST, {
@@ -2270,7 +2298,12 @@ display: “grid”,
 gridTemplateColumns: “1fr 1fr 1fr”,
 gap: 10
 }
-}, [[“Easy”, paces.E, “var(–run)”], [“Marathon”, paces.M, “var(–accent)”], [“Threshold”, paces.T, “var(–warn)”]].map(([l, p, c]) => /*#**PURE***/React.createElement(“div”, {
+}, [[“Easy”, paces.E, “var(–run)”], [“Marathon”, paces.M, “var(–accent)”], [“Threshold”, paces.T, “var(–warn)”]].map(_ref10 => {
+let _ref11 = _slicedToArray(_ref10, 3),
+l = _ref11[0],
+p = _ref11[1],
+c = _ref11[2];
+return /*#**PURE***/React.createElement(“div”, {
 key: l,
 style: {
 textAlign: “center”
@@ -2289,7 +2322,8 @@ fontSize: 14,
 fontWeight: 500,
 color: c
 }
-}, p))))), /*#**PURE***/React.createElement(Card, {
+}, p));
+}))), /*#**PURE***/React.createElement(Card, {
 style: {
 marginBottom: 12
 }
@@ -2376,28 +2410,26 @@ fontSize: 14
 }
 
 // ─── PAGE: WEEK ───────────────────────────────────────────────────────────────
-function PageWeek({
-state,
-dispatch,
-setTab
-}) {
-const {
-vdot,
-viewWeek,
-liftLogs,
-runLogs,
-vdotPromptDismissed
-} = state;
-const [modal, setModal] = useState(null);
+function PageWeek(_ref12) {
+let state = _ref12.state,
+dispatch = _ref12.dispatch,
+setTab = _ref12.setTab;
+const vdot = state.vdot,
+viewWeek = state.viewWeek,
+liftLogs = state.liftLogs,
+runLogs = state.runLogs,
+vdotPromptDismissed = state.vdotPromptDismissed;
+const _useState19 = useState(null),
+_useState20 = _slicedToArray(_useState19, 2),
+modal = _useState20[0],
+setModal = _useState20[1];
 const tw = viewWeek;
 const key = wkKey(tw);
 const rwInfo = getRunningWeekInfo(tw);
-const {
-blockNum,
-weekInBlock,
-targetMiles,
-isLastWeekOfBlock
-} = rwInfo;
+const blockNum = rwInfo.blockNum,
+weekInBlock = rwInfo.weekInBlock,
+targetMiles = rwInfo.targetMiles,
+isLastWeekOfBlock = rwInfo.isLastWeekOfBlock;
 const def = getWeekDef(blockNum, weekInBlock);
 const liftRir = LIFT_RIR_BY_WEEK[weekInBlock];
 const liftLabel = LIFT_INTENSITY_LABEL[weekInBlock];
@@ -2409,7 +2441,10 @@ const isCurrent = tw === nw;
 // Block boundary: show VDOT prompt if the previous week was the last of a block
 const prevBlockEndWeek = tw - 1;
 const showVdotPrompt = isCurrent && prevBlockEndWeek >= 1 && getRunningWeekInfo(prevBlockEndWeek).isLastWeekOfBlock && !vdotPromptDismissed.includes(prevBlockEndWeek);
-const isDone = item => item.type === “lift” ? !!liftLogs[key]?.[item.id]?.completed : !!runLogs[key]?.[item.id]?.completed;
+const isDone = item => {
+var _liftLogs$key, _runLogs$key;
+return item.type === “lift” ? !!((_liftLogs$key = liftLogs[key]) !== null && _liftLogs$key !== void 0 && (_liftLogs$key = _liftLogs$key[item.id]) !== null && _liftLogs$key !== void 0 && _liftLogs$key.completed) : !!((_runLogs$key = runLogs[key]) !== null && _runLogs$key !== void 0 && (_runLogs$key = _runLogs$key[item.id]) !== null && _runLogs$key !== void 0 && _runLogs$key.completed);
+};
 const doneCount = schedule.filter(isDone).length;
 const handleSaveLift = data => {
 dispatch({
@@ -2437,14 +2472,14 @@ return /*#**PURE***/React.createElement(“div”, {
 style: {
 padding: “20px 20px 100px”
 }
-}, modal?.type === “lift” && /*#**PURE***/React.createElement(LiftLogger, {
+}, (modal === null || modal === void 0 ? void 0 : modal.type) === “lift” && /*#**PURE***/React.createElement(LiftLogger, {
 sessionKey: modal.liftKey,
 weekKey: key,
 liftLogs: liftLogs,
 targetRir: liftRir,
 onSave: handleSaveLift,
 onClose: () => setModal(null)
-}), modal?.type === “run” && /*#**PURE***/React.createElement(RunDetail, {
+}), (modal === null || modal === void 0 ? void 0 : modal.type) === “run” && /*#**PURE***/React.createElement(RunDetail, {
 item: modal,
 weekKey: key,
 vdot: vdot,
@@ -2526,7 +2561,7 @@ marginBottom: 8
 }
 }, /*#**PURE***/React.createElement(“div”, {
 style: {
-background: hexAlpha(def.color,0.10),
+background: hexAlpha(def.color,0.1),
 borderRadius: “var(–r2)”,
 padding: “8px 10px”
 }
@@ -2551,7 +2586,7 @@ color: def.color
 }
 }, targetMiles, “ mi \xB7 “, miSum, “ planned”)), /*#**PURE***/React.createElement(“div”, {
 style: {
-background: hexAlpha(liftColor,0.10),
+background: hexAlpha(liftColor,0.1),
 borderRadius: “var(–r2)”,
 padding: “8px 10px”
 }
@@ -2590,7 +2625,12 @@ gridTemplateColumns: “repeat(3,1fr)”,
 gap: 8,
 marginBottom: 14
 }
-}, [[“VDOT”, vdot, “var(–accent)”], [“Miles”, targetMiles, “var(–run)”], [“Lifts”, 4, “var(–lift)”]].map(([l, v, c]) => /*#**PURE***/React.createElement(“div”, {
+}, [[“VDOT”, vdot, “var(–accent)”], [“Miles”, targetMiles, “var(–run)”], [“Lifts”, 4, “var(–lift)”]].map(_ref13 => {
+let _ref14 = _slicedToArray(_ref13, 3),
+l = _ref14[0],
+v = _ref14[1],
+c = _ref14[2];
+return /*#**PURE***/React.createElement(“div”, {
 key: l,
 style: {
 background: “var(–s1)”,
@@ -2614,11 +2654,13 @@ textTransform: “uppercase”,
 letterSpacing: “0.08em”,
 marginTop: 2
 }
-}, l)))), /*#**PURE***/React.createElement(ST, {
+}, l));
+})), /*#**PURE***/React.createElement(ST, {
 c: “Schedule”
 }), schedule.map((item, idx) => {
+var _LIFTS$item$liftKey, _item$runDef;
 const done = isDone(item);
-const color = item.type === “lift” ? LIFTS[item.liftKey]?.color : item.runDef?.color || “var(–run)”;
+const color = item.type === “lift” ? (_LIFTS$item$liftKey = LIFTS[item.liftKey]) === null || _LIFTS$item$liftKey === void 0 ? void 0 : _LIFTS$item$liftKey.color : ((_item$runDef = item.runDef) === null || _item$runDef === void 0 ? void 0 : _item$runDef.color) || “var(–run)”;
 const isTdy = toYMD(item.date) === todayStr();
 return /*#**PURE***/React.createElement(“button”, {
 key: idx,
@@ -2740,14 +2782,11 @@ padding: “9px 14px”
 }
 
 // ─── PAGE: CYCLE ──────────────────────────────────────────────────────────────
-function PageCycle({
-state,
-dispatch,
-setTab
-}) {
-const {
-vdot
-} = state;
+function PageCycle(_ref15) {
+let state = _ref15.state,
+dispatch = _ref15.dispatch,
+setTab = _ref15.setTab;
+const vdot = state.vdot;
 const nw = nowWeek();
 const paces = VDOT_PACES[vdot] || VDOT_PACES[46];
 const currentRwInfo = getRunningWeekInfo(nw);
@@ -2777,11 +2816,9 @@ marginBottom: 18
 }, “6-block, 24-week program \xB7 VDOT “, vdot), [0, 1, 2, 3].map(offset => {
 const tw = blockStartTw + offset;
 const rwi = getRunningWeekInfo(tw);
-const {
-blockNum,
-weekInBlock,
-targetMiles
-} = rwi;
+const blockNum = rwi.blockNum,
+weekInBlock = rwi.weekInBlock,
+targetMiles = rwi.targetMiles;
 const wdef = getWeekDef(blockNum, weekInBlock);
 const liftRir = LIFT_RIR_BY_WEEK[weekInBlock];
 const liftLabel = LIFT_INTENSITY_LABEL[weekInBlock];
@@ -2803,7 +2840,7 @@ setTab(“week”);
 style: {
 width: “100%”,
 background: isActive ? hexAlpha(wdef.color,0.08) : “var(–s1)”,
-border: `1px solid ${isActive ? hexAlpha(wdef.color,0.30) : "var(--b1)"}`,
+border: `1px solid ${isActive ? hexAlpha(wdef.color,0.3) : "var(--b1)"}`,
 borderRadius: “var(–r)”,
 padding: 14,
 marginBottom: 10,
@@ -2819,7 +2856,7 @@ style: {
 width: 26,
 height: 26,
 borderRadius: 7,
-background: hexAlpha(wdef.color,0.20),
+background: hexAlpha(wdef.color,0.2),
 display: “flex”,
 alignItems: “center”,
 justifyContent: “center”,
@@ -2879,15 +2916,15 @@ display: “block”
 }, targetMiles, “ mi”), /*#**PURE***/React.createElement(“div”, {
 style: {
 fontSize: 11,
-color: typeColor(q1d?.type),
+color: typeColor(q1d === null || q1d === void 0 ? void 0 : q1d.type),
 marginTop: 2
 }
-}, q1d?.label), /*#**PURE***/React.createElement(“div”, {
+}, q1d === null || q1d === void 0 ? void 0 : q1d.label), /*#**PURE***/React.createElement(“div”, {
 style: {
 fontSize: 11,
-color: typeColor(q2d?.type)
+color: typeColor(q2d === null || q2d === void 0 ? void 0 : q2d.type)
 }
-}, q2d?.label)), /*#**PURE***/React.createElement(“div”, {
+}, q2d === null || q2d === void 0 ? void 0 : q2d.label)), /*#**PURE***/React.createElement(“div”, {
 style: {
 background: hexAlpha(liftColor,0.08),
 borderRadius: “var(–r2)”,
@@ -2925,7 +2962,12 @@ display: “grid”,
 gridTemplateColumns: “repeat(4,1fr)”,
 gap: 4
 }
-}, [[“Tue”, mi.easy, “var(–run)”], [“Thu”, mi.Q1, typeColor(q1d?.type)], [“Sat”, mi.easy2, “var(–run)”], [“Sun”, mi.Q2, typeColor(q2d?.type)]].map(([l, v, c]) => /*#**PURE***/React.createElement(“div”, {
+}, [[“Tue”, mi.easy, “var(–run)”], [“Thu”, mi.Q1, typeColor(q1d === null || q1d === void 0 ? void 0 : q1d.type)], [“Sat”, mi.easy2, “var(–run)”], [“Sun”, mi.Q2, typeColor(q2d === null || q2d === void 0 ? void 0 : q2d.type)]].map(_ref16 => {
+let _ref17 = _slicedToArray(_ref16, 3),
+l = _ref17[0],
+v = _ref17[1],
+c = _ref17[2];
+return /*#**PURE***/React.createElement(“div”, {
 key: l,
 style: {
 background: “var(–s3)”,
@@ -2946,7 +2988,8 @@ fontSize: 9,
 color: “var(–t3)”,
 marginTop: 1
 }
-}, l)))), /*#**PURE***/React.createElement(“div”, {
+}, l));
+})), /*#**PURE***/React.createElement(“div”, {
 style: {
 fontSize: 10,
 color: “var(–t3)”,
@@ -2994,7 +3037,7 @@ return /*#**PURE***/React.createElement(“div”, {
 key: wi,
 style: {
 flex: 1,
-background: isThisWeek ? hexAlpha(wdef.color,0.20) : “var(–s2)”,
+background: isThisWeek ? hexAlpha(wdef.color,0.2) : “var(–s2)”,
 border: isThisWeek ? `1px solid ${wdef.color}` : “1px solid var(–b1)”,
 borderRadius: 6,
 padding: “5px 4px”,
@@ -3022,7 +3065,11 @@ display: “flex”,
 gap: 10,
 marginTop: 8
 }
-}, Object.entries(LIFT_INTENSITY_COLOR).map(([w, c]) => /*#**PURE***/React.createElement(Row, {
+}, Object.entries(LIFT_INTENSITY_COLOR).map(_ref18 => {
+let _ref19 = _slicedToArray(_ref18, 2),
+w = _ref19[0],
+c = _ref19[1];
+return /*#**PURE***/React.createElement(Row, {
 key: w,
 style: {
 gap: 4
@@ -3039,7 +3086,8 @@ style: {
 fontSize: 10,
 color: “var(–t3)”
 }
-}, LIFT_INTENSITY_LABEL[w]))))), /*#**PURE***/React.createElement(Card, null, /*#**PURE***/React.createElement(ST, {
+}, LIFT_INTENSITY_LABEL[w]));
+}))), /*#**PURE***/React.createElement(Card, null, /*#**PURE***/React.createElement(ST, {
 c: `Paces — VDOT ${vdot}`
 }), /*#**PURE***/React.createElement(“div”, {
 style: {
@@ -3047,7 +3095,13 @@ display: “grid”,
 gridTemplateColumns: “1fr 1fr”,
 gap: 8
 }
-}, [[“Easy”, paces.E, “var(–run)”, “Conversational”], [“Marathon”, paces.M, “var(–accent)”, “Race effort”], [“Threshold”, paces.T, “var(–warn)”, “Comfortably hard”], [“Interval /400”, paces.I400, “var(–err)”, “Hard repeats”]].map(([l, p, c, h]) => /*#**PURE***/React.createElement(“div”, {
+}, [[“Easy”, paces.E, “var(–run)”, “Conversational”], [“Marathon”, paces.M, “var(–accent)”, “Race effort”], [“Threshold”, paces.T, “var(–warn)”, “Comfortably hard”], [“Interval /400”, paces.I400, “var(–err)”, “Hard repeats”]].map(_ref20 => {
+let _ref21 = _slicedToArray(_ref20, 4),
+l = _ref21[0],
+p = _ref21[1],
+c = _ref21[2],
+h = _ref21[3];
+return /*#**PURE***/React.createElement(“div”, {
 key: l,
 style: {
 background: “var(–s3)”,
@@ -3074,7 +3128,8 @@ fontSize: 10,
 color: “var(–t3)”,
 marginTop: 2
 }
-}, h))))), /*#**PURE***/React.createElement(Card, {
+}, h));
+}))), /*#**PURE***/React.createElement(Card, {
 style: {
 marginTop: 10,
 background: “#111208”,
@@ -3119,20 +3174,26 @@ marginTop: 8
 }
 
 // ─── PAGE: HISTORY ────────────────────────────────────────────────────────────
-function PageHistory({
-state
-}) {
-const {
-liftLogs,
-runLogs
-} = state;
-const [tab, setTab] = useState(“runs”);
+function PageHistory(_ref22) {
+let state = _ref22.state;
+const liftLogs = state.liftLogs,
+runLogs = state.runLogs;
+const _useState21 = useState(“runs”),
+_useState22 = _slicedToArray(_useState21, 2),
+tab = _useState22[0],
+setTab = _useState22[1];
 const runs = useMemo(() => {
 const arr = [];
-Object.entries(runLogs).forEach(([wk, sessions]) => {
+Object.entries(runLogs).forEach(_ref23 => {
+let _ref24 = _slicedToArray(_ref23, 2),
+wk = _ref24[0],
+sessions = _ref24[1];
 const tw = parseInt(wk.replace(“w”, “”));
-Object.entries(sessions).forEach(([sid, d]) => {
-if (!d?.completed) return;
+Object.entries(sessions).forEach(_ref25 => {
+let _ref26 = _slicedToArray(_ref25, 2),
+sid = _ref26[0],
+d = _ref26[1];
+if (!(d !== null && d !== void 0 && d.completed)) return;
 arr.push({
 tw,
 sid,
@@ -3145,10 +3206,16 @@ return arr.sort((a, b) => (b.date || “”).localeCompare(a.date || “”));
 }, [runLogs]);
 const lifts = useMemo(() => {
 const arr = [];
-Object.entries(liftLogs).forEach(([wk, sessions]) => {
+Object.entries(liftLogs).forEach(_ref27 => {
+let _ref28 = _slicedToArray(_ref27, 2),
+wk = _ref28[0],
+sessions = _ref28[1];
 const tw = parseInt(wk.replace(“w”, “”));
-Object.entries(sessions).forEach(([sid, d]) => {
-if (!d?.completed) return;
+Object.entries(sessions).forEach(_ref29 => {
+let _ref30 = _slicedToArray(_ref29, 2),
+sid = _ref30[0],
+d = _ref30[1];
+if (!(d !== null && d !== void 0 && d.completed)) return;
 arr.push({
 tw,
 sid,
@@ -3161,21 +3228,32 @@ return arr.sort((a, b) => (b.date || “”).localeCompare(a.date || “”));
 }, [liftLogs]);
 const weeklyMi = useMemo(() => {
 const map = {};
-Object.entries(runLogs).forEach(([wk, sessions]) => {
+Object.entries(runLogs).forEach(_ref31 => {
+let _ref32 = _slicedToArray(_ref31, 2),
+wk = _ref32[0],
+sessions = _ref32[1];
 const tw = parseInt(wk.replace(“w”, “”));
 if (!map[tw]) map[tw] = 0;
 Object.values(sessions).forEach(d => {
-if (d?.completed && d.distance) map[tw] += parseFloat(d.distance) || 0;
+if (d !== null && d !== void 0 && d.completed && d.distance) map[tw] += parseFloat(d.distance) || 0;
 });
 });
-return Object.entries(map).map(([w, m]) => ({
+return Object.entries(map).map(_ref33 => {
+let _ref34 = _slicedToArray(_ref33, 2),
+w = _ref34[0],
+m = _ref34[1];
+return {
 w: parseInt(w),
 m: Math.round(m * 10) / 10
-})).sort((a, b) => a.w - b.w).slice(-10);
+};
+}).sort((a, b) => a.w - b.w).slice(-10);
 }, [runLogs]);
 const paceTrend = useMemo(() => {
 return […runs].reverse().filter(r => r.actualPace && r.actualPace.includes(”:”)).slice(0, 12).map(r => {
-const [min, sec] = r.actualPace.split(”:”).map(Number);
+const _r$actualPace$split$m = r.actualPace.split(”:”).map(Number),
+_r$actualPace$split$m2 = _slicedToArray(_r$actualPace$split$m, 2),
+min = _r$actualPace$split$m2[0],
+sec = _r$actualPace$split$m2[1];
 return {
 date: r.date.slice(5),
 pace: min + (sec || 0) / 60
@@ -3183,10 +3261,9 @@ pace: min + (sec || 0) / 60
 });
 }, [runs]);
 const totalMi = runs.reduce((s, r) => s + (parseFloat(r.distance) || 0), 0);
-const BarChart = ({
-data,
-color
-}) => {
+const BarChart = _ref35 => {
+let data = _ref35.data,
+color = _ref35.color;
 if (!data.length) return /*#**PURE***/React.createElement(“div”, {
 style: {
 fontSize: 13,
@@ -3234,9 +3311,9 @@ whiteSpace: “nowrap”
 }
 }, d.label))));
 };
-const LineChart = ({
-data
-}) => {
+const LineChart = _ref36 => {
+var _data$, _data;
+let data = _ref36.data;
 if (data.length < 2) return /*#**PURE***/React.createElement(“div”, {
 style: {
 fontSize: 13,
@@ -3282,7 +3359,7 @@ fontSize: 9,
 color: “var(–t3)”,
 marginTop: 4
 }
-}, /*#**PURE***/React.createElement(“span”, null, data[0]?.date), /*#**PURE***/React.createElement(“span”, null, “\u2190 faster \xB7 slower \u2192”), /*#**PURE***/React.createElement(“span”, null, data[data.length - 1]?.date)));
+}, /*#**PURE***/React.createElement(“span”, null, (_data$ = data[0]) === null || _data$ === void 0 ? void 0 : _data$.date), /*#**PURE***/React.createElement(“span”, null, “\u2190 faster \xB7 slower \u2192”), /*#**PURE***/React.createElement(“span”, null, (_data = data[data.length - 1]) === null || _data === void 0 ? void 0 : _data.date)));
 };
 return /*#**PURE***/React.createElement(“div”, {
 style: {
@@ -3308,7 +3385,12 @@ gridTemplateColumns: “repeat(3,1fr)”,
 gap: 8,
 marginBottom: 16
 }
-}, [[runs.length, “Runs”, “var(–run)”], [Math.round(totalMi * 10) / 10, “Miles”, “var(–accent)”], [lifts.length, “Sessions”, “var(–lift)”]].map(([v, l, c]) => /*#**PURE***/React.createElement(“div”, {
+}, [[runs.length, “Runs”, “var(–run)”], [Math.round(totalMi * 10) / 10, “Miles”, “var(–accent)”], [lifts.length, “Sessions”, “var(–lift)”]].map(_ref37 => {
+let _ref38 = _slicedToArray(_ref37, 3),
+v = _ref38[0],
+l = _ref38[1],
+c = _ref38[2];
+return /*#**PURE***/React.createElement(“div”, {
 key: l,
 style: {
 background: “var(–s1)”,
@@ -3332,7 +3414,8 @@ textTransform: “uppercase”,
 letterSpacing: “0.08em”,
 marginTop: 2
 }
-}, l)))), /*#**PURE***/React.createElement(“div”, {
+}, l));
+})), /*#**PURE***/React.createElement(“div”, {
 style: {
 display: “flex”,
 gap: 6,
@@ -3383,7 +3466,8 @@ textAlign: “center”,
 padding: 30
 }
 }, “No runs logged yet.”) : runs.slice(0, 10).map((r, i) => {
-const tc = typeColor(r.rd?.type),
+var _r$rd, _r$rd2;
+const tc = typeColor((_r$rd = r.rd) === null || _r$rd === void 0 ? void 0 : _r$rd.type),
 feelObj = FEEL.find(f => f.v === r.feel);
 return /*#**PURE***/React.createElement(Card, {
 key: i,
@@ -3412,7 +3496,7 @@ style: {
 fontSize: 14,
 fontWeight: 700
 }
-}, r.rd?.label || r.sid)), /*#**PURE***/React.createElement(“div”, {
+}, ((_r$rd2 = r.rd) === null || _r$rd2 === void 0 ? void 0 : _r$rd2.label) || r.sid)), /*#**PURE***/React.createElement(“div”, {
 style: {
 textAlign: “right”
 }
@@ -3449,7 +3533,11 @@ textAlign: “center”,
 padding: 30
 }
 }, “No sessions logged yet.”) : lifts.slice(0, 8).map((r, i) => {
-const exLogged = Object.keys(r).filter(k => ![“sessionNote”, “completed”, “date”, “tw”, “sid”, “def”].includes(k) && r[k]?.sets);
+var _r$def;
+const exLogged = Object.keys(r).filter(k => {
+var _r$k;
+return ![“sessionNote”, “completed”, “date”, “tw”, “sid”, “def”].includes(k) && ((_r$k = r[k]) === null || _r$k === void 0 ? void 0 : _r$k.sets);
+});
 return /*#**PURE***/React.createElement(Card, {
 key: i,
 style: {
@@ -3470,7 +3558,7 @@ fontSize: 14,
 fontWeight: 700,
 marginTop: 2
 }
-}, r.def?.label || r.sid)), r.def && /*#**PURE***/React.createElement(“div”, {
+}, ((_r$def = r.def) === null || _r$def === void 0 ? void 0 : _r$def.label) || r.sid)), r.def && /*#**PURE***/React.createElement(“div”, {
 style: {
 width: 10,
 height: 10,
@@ -3478,7 +3566,8 @@ borderRadius: “50%”,
 background: r.def.color
 }
 })), exLogged.map(ex => {
-const sets = r[ex]?.sets || [];
+var _r$ex;
+const sets = ((_r$ex = r[ex]) === null || _r$ex === void 0 ? void 0 : _r$ex.sets) || [];
 const vol = sets.reduce((s, set) => s + (parseFloat(set.reps) || 0) * (parseFloat(set.weight) || 0), 0);
 const avgRir = sets.length ? sets.reduce((s, set) => s + (parseFloat(set.rir) || 3), 0) / sets.length : null;
 return /*#**PURE***/React.createElement(“div”, {
@@ -3521,11 +3610,13 @@ marginTop: 4
 }
 
 // ─── PAGE: SETTINGS ───────────────────────────────────────────────────────────
-function PageSettings({
-state,
-dispatch
-}) {
-const [vdotD, setVdotD] = useState(state.vdot);
+function PageSettings(_ref39) {
+let state = _ref39.state,
+dispatch = _ref39.dispatch;
+const _useState23 = useState(state.vdot),
+_useState24 = _slicedToArray(_useState23, 2),
+vdotD = _useState24[0],
+setVdotD = _useState24[1];
 const flags = Object.entries(state.overloadFlags);
 return /*#**PURE***/React.createElement(“div”, {
 style: {
@@ -3553,7 +3644,11 @@ style: {
 fontSize: 13,
 fontWeight: 700
 }
-}, “Overload Flags”)), flags.map(([name, flag]) => /*#**PURE***/React.createElement(“div”, {
+}, “Overload Flags”)), flags.map(_ref40 => {
+let _ref41 = _slicedToArray(_ref40, 2),
+name = _ref41[0],
+flag = _ref41[1];
+return /*#**PURE***/React.createElement(“div”, {
 key: name,
 style: {
 marginBottom: 6
@@ -3569,7 +3664,8 @@ style: {
 fontSize: 12,
 color: “var(–t2)”
 }
-}, flag.msg)))), /*#**PURE***/React.createElement(Card, {
+}, flag.msg));
+})), /*#**PURE***/React.createElement(Card, {
 style: {
 marginBottom: 12
 }
@@ -3685,8 +3781,14 @@ borderColor: “rgba(252,76,2,0.30)”
 
 // ─── ROOT ─────────────────────────────────────────────────────────────────────
 function App() {
-const [state, dispatch] = useReducer(reducer, null, initState);
-const [tab, setTab] = useState(“week”);
+const _useReducer = useReducer(reducer, null, initState),
+_useReducer2 = _slicedToArray(_useReducer, 2),
+state = _useReducer2[0],
+dispatch = _useReducer2[1];
+const _useState25 = useState(“week”),
+_useState26 = _slicedToArray(_useState25, 2),
+tab = _useState26[0],
+setTab = _useState26[1];
 const TABS = [{
 id: “week”,
 label: “Week”,
@@ -3798,15 +3900,26 @@ transition: “color .15s”
 }
 
 // ─── STRAVA PANEL (injected into Settings) ───────────────────────────────
-function StravaPanel({
-dispatch
-}) {
-const [tokens, setTokens] = useState(() => StravaAuth.getTokens());
-const [syncing, setSyncing] = useState(false);
-const [lastSync, setLastSync] = useState(() => localStorage.getItem(“stravaLastSync”) || null);
-const [syncMsg, setSyncMsg] = useState(””);
-const connected = !!tokens?.accessToken;
-const athlete = tokens?.athlete;
+function StravaPanel(_ref42) {
+let dispatch = _ref42.dispatch;
+const _useState27 = useState(() => StravaAuth.getTokens()),
+_useState28 = _slicedToArray(_useState27, 2),
+tokens = _useState28[0],
+setTokens = _useState28[1];
+const _useState29 = useState(false),
+_useState30 = _slicedToArray(_useState29, 2),
+syncing = _useState30[0],
+setSyncing = _useState30[1];
+const _useState31 = useState(() => localStorage.getItem(“stravaLastSync”) || null),
+_useState32 = _slicedToArray(_useState31, 2),
+lastSync = _useState32[0],
+setLastSync = _useState32[1];
+const _useState33 = useState(””),
+_useState34 = _slicedToArray(_useState33, 2),
+syncMsg = _useState34[0],
+setSyncMsg = _useState34[1];
+const connected = !!(tokens !== null && tokens !== void 0 && tokens.accessToken);
+const athlete = tokens === null || tokens === void 0 ? void 0 : tokens.athlete;
 async function sync(runLogs) {
 setSyncing(true);
 setSyncMsg(“Fetching activities…”);
@@ -4003,7 +4116,11 @@ d: “M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.5
 })), “Connect Strava”)));
 }
 
-// (settings wrapper already defined above) {
+// ─── PATCH Settings to include StravaPanel ───────────────────────────────
+const _OrigPageSettings = PageSettings;
+function PageSettingsWithStrava(_ref43) {
+let state = _ref43.state,
+dispatch = _ref43.dispatch;
 return /*#**PURE***/React.createElement(“div”, null, /*#**PURE***/React.createElement(_OrigPageSettings, {
 state: state,
 dispatch: dispatch
@@ -4018,20 +4135,16 @@ dispatch: dispatch
 
 // ─── MOUNT ───────────────────────────────────────────────────────────────
 ReactDOM.createRoot(document.getElementById(“root”)).render(React.createElement(App));
-} catch(e) {
-document.getElementById(‘root’).innerHTML =
-‘<div style="padding:30px;font-family:monospace;color:#f87171;background:#080809;min-height:100vh">’ +
-‘<div style="font-size:18px;margin-bottom:12px">⚠ Startup Error</div>’ +
-‘<div style="font-size:13px;line-height:1.8;color:#fbbf24">’ + (e && e.message || String(e)) + ‘</div>’ +
-‘<div style="font-size:11px;color:#5a5a64;margin-top:12px">’ + (e && e.stack || ‘’) + ‘</div>’ +
-‘</div>’;
-}
 
-</script>
-<script>
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(()=>{}));
+ReactDOM.createRoot(document.getElementById(“root”)).render(React.createElement(App));
+} catch(e) {
+document.getElementById(‘root’).innerHTML=’<div style="padding:30px;font-family:monospace;color:#f87171;background:#080809;min-height:100vh"><b>Startup Error</b><br><br>’+(e&&e.message||String(e))+’<br><br><small style="color:#5a5a64;word-break:break-all">’+(e&&e.stack||’’)+’</small></div>’;
 }
 </script>
+
+<script>
+if("serviceWorker"in navigator){window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){});});}
+</script>
+
 </body>
 </html>
