@@ -78,17 +78,15 @@ if (code) { await StravaAuth.handleCallback(code); window.location.replace(STRAV
 <script>
 var useState=React.useState,useReducer=React.useReducer,useMemo=React.useMemo;
 
-function hexAlpha(hex, alpha) {
-var map = {
-‘#38bdf8’:‘56,189,248’,’#fbbf24’:‘251,191,36’,’#e2ff5d’:‘226,255,93’,
+function hexAlpha(hex,alpha){
+var m={’#38bdf8’:‘56,189,248’,’#fbbf24’:‘251,191,36’,’#e2ff5d’:‘226,255,93’,
 ‘#fb923c’:‘251,146,60’,’#a78bfa’:‘167,139,250’,’#f472b6’:‘244,114,182’,
 ‘#60a5fa’:‘96,165,250’,’#f87171’:‘248,113,113’,’#4ade80’:‘74,222,128’,
-‘#d6ff4b’:‘214,255,75’,’#fc4c02’:‘252,76,2’
-};
-return ‘rgba(’+(map[hex]||‘128,128,128’)+’,’+alpha+’)’;
+‘#d6ff4b’:‘214,255,75’,’#fc4c02’:‘252,76,2’};
+return ‘rgba(’+(m[hex]||‘128,128,128’)+’,’+alpha+’)’;
 }
 
-function StravaPanel() {
+function StravaPanel(){
 var _s1=React.useState(function(){return StravaAuth.getTokens();}),tokens=_s1[0],setTokens=_s1[1];
 var _s2=React.useState(false),syncing=_s2[0],setSyncing=_s2[1];
 var _s3=React.useState(function(){return localStorage.getItem(“stravaLastSync”)||null;}),lastSync=_s3[0],setLastSync=_s3[1];
@@ -693,7 +691,7 @@ T_track: {
 label: “Track Threshold”,
 type: “T”,
 color: “#fbbf24”,
-desc: “Track workout with shorter T intervals – 400m, 800m, or 1600m repeats at threshold pace.”,
+desc: “Track workout – 400m, 800m, or 1600m repeats at repetition (R) pace. Faster than threshold.”,
 scienceNote: “Track T workouts use shorter repeats than road threshold runs, letting you accumulate quality volume with better mechanical precision. 400m repeats stress the upper threshold zone and build leg turnover; 800m hits the sweet spot for lactate accumulation and clearance; 1600m builds sustained threshold capacity. Pick the distance based on feel – use 1600s early in a cycle, progress to 800s and 400s as fitness sharpens. The track removes pacing guesswork and makes split data directly comparable week to week.”,
 getSegs: p => [{
 label: “Warm-up”,
@@ -703,20 +701,20 @@ miles: 2,
 feel: “Easy”
 }, {
 label: “Option A: 12x 400m”,
-pace: p.T,
-dist: “~3 mi total (90s jog recovery)”,
+pace: p.R400,
+dist: “~3 mi total (90s walk/jog)”,
 miles: 3,
-feel: “T pace – comfortably hard, even splits”
+feel: “R pace – fast but controlled, full recovery between”
 }, {
 label: “Option B: 6x 800m”,
-pace: p.T,
-dist: “~3 mi total (90s jog recovery)”,
+pace: p.R400,
+dist: “~3 mi total (90s walk/jog)”,
 miles: 3,
-feel: “T pace – comfortably hard, even splits”
+feel: “R pace – fast but controlled, full recovery between”
 }, {
 label: “Option C: 4x 1600m”,
 pace: p.T,
-dist: “~4 mi total (90s jog recovery)”,
+dist: “~4 mi total (90s jog)”,
 miles: 4,
 feel: “T pace – comfortably hard, even splits”
 }, {
@@ -900,30 +898,87 @@ const def = getWeekDef(blockNum, weekInBlock);
 const start = weekStart(tw);
 const mi = allocateMiles(targetMiles, blockNum, weekInBlock);
 
-// Always put the LONGER quality run on Sunday, shorter on Thursday
+// Always put the LONGEST run of the week on Sunday.
+// Compare all 4 runs: easy (Tue), Q1 (Thu candidate), easy2 (Sat), Q2 (Sun candidate)
 const q1d = RUN_DEFS[def.Q1type];
 const q2d = RUN_DEFS[def.Q2type];
-const thuRun = mi.Q1 >= mi.Q2 ? {
+
+// Find the single largest mileage across all runs
+const allRuns = [{
+def: RUN_DEFS.easy,
+key: “easy”,
+miles: mi.easy,
+id: “easy”,
+day: “tue”
+}, {
+def: q1d,
+key: def.Q1type,
+miles: mi.Q1,
+id: “Q1”,
+day: “thu”
+}, {
+def: RUN_DEFS.easy2,
+key: “easy2”,
+miles: mi.easy2,
+id: “easy2”,
+day: “sat”
+}, {
+def: q2d,
+key: def.Q2type,
+miles: mi.Q2,
+id: “Q2”,
+day: “sun”
+}];
+const maxMiles = Math.max(…allRuns.map(r => r.miles));
+const longestIdx = allRuns.findIndex(r => r.miles === maxMiles);
+
+// The longest run goes to Sunday. If it was already a Q slot, swap normally.
+// If it was an easy run (Tue or Sat), we swap it to Sunday and put the
+// original Sunday Q run in that easy slot instead.
+const sunRun = allRuns[longestIdx];
+
+// For Thursday: pick the larger of the two Q runs (but not the one on Sunday)
+// If the longest was easy_tue, Thursday gets Q1; if longest was easy_sat, Thu gets Q1
+// If longest was Q1 -> Thu gets Q2; if longest was Q2 -> Thu gets Q1
+let thuRun;
+if (longestIdx === 1) {
+// Q1 is longest -> Thu gets Q2
+thuRun = {
 def: q2d,
 key: def.Q2type,
 miles: mi.Q2,
 id: “Q2”
-} : {
+};
+} else {
+// anything else -> Thu gets Q1 (or Q2 if Q1 ended up on Sunday somehow)
+thuRun = {
 def: q1d,
 key: def.Q1type,
 miles: mi.Q1,
 id: “Q1”
 };
-const sunRun = mi.Q1 >= mi.Q2 ? {
-def: q1d,
-key: def.Q1type,
-miles: mi.Q1,
-id: “Q1”
-} : {
-def: q2d,
-key: def.Q2type,
-miles: mi.Q2,
-id: “Q2”
+}
+
+// Easy runs: whichever didn’t go to Sunday stays in its normal slot
+const tueRun = longestIdx === 0 ? {
+def: RUN_DEFS.easy2,
+key: “easy2”,
+miles: mi.easy2
+} // easy was moved to Sun, use easy2
+: {
+def: RUN_DEFS.easy,
+key: “easy”,
+miles: mi.easy
+};
+const satRun = longestIdx === 2 ? {
+def: RUN_DEFS.easy,
+key: “easy”,
+miles: mi.easy
+} // easy2 was moved to Sun, use easy
+: {
+def: RUN_DEFS.easy2,
+key: “easy2”,
+miles: mi.easy2
 };
 return [{
 id: “pull”,
@@ -933,14 +988,14 @@ type: “lift”,
 label: “Pull”,
 liftKey: “pull”
 }, {
-id: “easy”,
+id: tueRun.key,
 date: addDays(start, 1),
 day: “Tue”,
 type: “run”,
-label: “Easy Run”,
-runKey: “easy”,
-miles: mi.easy,
-runDef: RUN_DEFS.easy
+label: tueRun.def.label,
+runKey: tueRun.key,
+miles: tueRun.miles,
+runDef: tueRun.def
 }, {
 id: “push”,
 date: addDays(start, 2),
@@ -965,14 +1020,14 @@ type: “lift”,
 label: “Legs”,
 liftKey: “legs”
 }, {
-id: “easy2”,
+id: satRun.key,
 date: addDays(start, 5),
 day: “Sat”,
 type: “run”,
-label: “Easy Run”,
-runKey: “easy2”,
-miles: mi.easy2,
-runDef: RUN_DEFS.easy2
+label: satRun.def.label,
+runKey: satRun.key,
+miles: satRun.miles,
+runDef: satRun.def
 }, {
 id: “sharms”,
 date: addDays(start, 5),
@@ -1165,19 +1220,19 @@ notes: “Myorep second set”
 const FEEL = [{
 v: 1,
 label: “Terrible”,
-e: “x_x”
+e: “[x]”
 }, {
 v: 2,
 label: “Very Hard”,
-e: “>:(”
+e: “(hard)”
 }, {
 v: 3,
 label: “Hard”,
-e: “:/”
+e: “(sweat)”
 }, {
 v: 4,
 label: “OK”,
-e: “:-|”
+e: “(ok)”
 }, {
 v: 5,
 label: “Good”,
@@ -1185,11 +1240,11 @@ e: “:)”
 }, {
 v: 6,
 label: “Strong”,
-e: “:muscle:”
+e: “(strong)”
 }, {
 v: 7,
 label: “Easy”,
-e: “(o)”
+e: “(easy)”
 }];
 
 // — STORAGE ——————————————————————
@@ -2956,7 +3011,31 @@ display: “grid”,
 gridTemplateColumns: “repeat(4,1fr)”,
 gap: 4
 }
-}, [[“Tue”, mi.easy, “var(–run)”], [“Thu”, mi.Q1, typeColor(q1d === null || q1d === void 0 ? void 0 : q1d.type)], [“Sat”, mi.easy2, “var(–run)”], [“Sun”, mi.Q2, typeColor(q2d === null || q2d === void 0 ? void 0 : q2d.type)]].map(_ref16 => {
+}, (() => {
+const allR = [{
+miles: mi.easy,
+color: “var(–run)”
+}, {
+miles: mi.Q1,
+color: typeColor(q1d === null || q1d === void 0 ? void 0 : q1d.type)
+}, {
+miles: mi.easy2,
+color: “var(–run)”
+}, {
+miles: mi.Q2,
+color: typeColor(q2d === null || q2d === void 0 ? void 0 : q2d.type)
+}];
+const maxM = Math.max(…allR.map(r => r.miles));
+const li = allR.findIndex(r => r.miles === maxM);
+// Sun gets the longest; Thu gets the larger Q that didn’t go to Sun
+const sunMi = allR[li].miles,
+sunColor = allR[li].color;
+const thuMi = li === 1 ? mi.Q2 : mi.Q1,
+thuColor = li === 1 ? typeColor(q2d === null || q2d === void 0 ? void 0 : q2d.type) : typeColor(q1d === null || q1d === void 0 ? void 0 : q1d.type);
+const tueMi = li === 0 ? mi.easy2 : mi.easy;
+const satMi = li === 2 ? mi.easy : mi.easy2;
+return [[“Tue”, tueMi, “var(–run)”], [“Thu”, thuMi, thuColor], [“Sat”, satMi, “var(–run)”], [“Sun”, sunMi, sunColor]];
+})().map(_ref16 => {
 let _ref17 = _slicedToArray(_ref16, 3),
 l = _ref17[0],
 v = _ref17[1],
