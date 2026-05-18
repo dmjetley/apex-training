@@ -1815,7 +1815,7 @@ style: {
 fontSize: 14,
 fontWeight: 700
 }
-}, “4-Week Block Complete \u2014 Assess VDOT”)), /*#**PURE***/React.createElement(“div”, {
+}, “4-Week Block Complete – Assess VDOT”)), /*#**PURE***/React.createElement(“div”, {
 style: {
 fontSize: 12,
 color: “var(–t2)”,
@@ -2113,7 +2113,7 @@ type: “number”,
 inputMode: “numeric”,
 value: set.reps,
 onChange: e => upd(ai, si, “reps”, e.target.value),
-placeholder: “\u2014”,
+placeholder: “–”,
 style: {
 textAlign: “center”,
 padding: “8px 4px”
@@ -2123,7 +2123,7 @@ type: “number”,
 inputMode: “decimal”,
 value: set.weight,
 onChange: e => upd(ai, si, “weight”, e.target.value),
-placeholder: “\u2014”,
+placeholder: “–”,
 style: {
 textAlign: “center”,
 padding: “8px 4px”
@@ -2247,7 +2247,7 @@ marginBottom: 4,
 textTransform: “uppercase”,
 letterSpacing: “0.08em”
 }
-}, “Running \xB7 “, fmtFull(item.date)), /*#**PURE***/React.createElement(“div”, {
+}, “Running . “, fmtFull(item.date)), /*#**PURE***/React.createElement(“div”, {
 style: {
 fontSize: 22,
 fontWeight: 800,
@@ -2333,7 +2333,7 @@ fontSize: 11,
 color: “var(–t3)”,
 marginTop: 2
 }
-}, seg.dist, “ \xB7 “, seg.feel))))), /*#**PURE***/React.createElement(Card, {
+}, seg.dist, “ . “, seg.feel))))), /*#**PURE***/React.createElement(Card, {
 style: {
 background: hexAlpha(tc,0.05),
 border: “1px solid “+hexAlpha(tc,0.18),
@@ -2546,18 +2546,18 @@ color: “var(–t3)”,
 textTransform: “uppercase”,
 letterSpacing: “0.08em”
 }
-}, “Block “, blockNum, “/6 \xB7 Week “, weekInBlock, “/4”, isCurrent && /*#**PURE***/React.createElement(“span”, {
+}, “Block “, blockNum, “/6 . Week “, weekInBlock, “/4”, isCurrent && /*#**PURE***/React.createElement(“span”, {
 style: {
 color: “var(–accent)”
 }
-}, “ \xB7 Current”)), /*#**PURE***/React.createElement(“div”, {
+}, “ . Current”)), /*#**PURE***/React.createElement(“div”, {
 style: {
 fontSize: 26,
 fontWeight: 800,
 letterSpacing: “-0.03em”,
 marginTop: 2
 }
-}, fmtShort(weekStart(tw)), “ \u2013 “, fmtShort(weekEnd(tw)))), /*#**PURE***/React.createElement(“div”, {
+}, fmtShort(weekStart(tw)), “ - “, fmtShort(weekEnd(tw)))), /*#**PURE***/React.createElement(“div”, {
 style: {
 textAlign: “right”
 }
@@ -2633,7 +2633,7 @@ style: {
 fontSize: 12,
 color: def.color
 }
-}, targetMiles, “ mi \xB7 “, miSum, “ planned”)), /*#**PURE***/React.createElement(“div”, {
+}, targetMiles, “ mi . “, miSum, “ planned”)), /*#**PURE***/React.createElement(“div”, {
 style: {
 background: hexAlpha(liftColor,0.1),
 borderRadius: “var(–r2)”,
@@ -2667,7 +2667,7 @@ color: “var(–t3)”
 style: {
 color: “var(–accent)”
 }
-}, “View cycle \u2192”))), /*#**PURE***/React.createElement(“div”, {
+}, “View cycle ->”))), /*#**PURE***/React.createElement(“div”, {
 style: {
 display: “grid”,
 gridTemplateColumns: “repeat(3,1fr)”,
@@ -2777,7 +2777,7 @@ fontSize: 11,
 color: liftColor,
 marginTop: 1
 }
-}, liftLabel, “ \xB7 “, liftRir, “ RIR”)), /*#**PURE***/React.createElement(Row, {
+}, liftLabel, “ . “, liftRir, “ RIR”)), /*#**PURE***/React.createElement(Row, {
 style: {
 gap: 6,
 flexShrink: 0
@@ -2862,7 +2862,7 @@ fontSize: 13,
 color: “var(–t2)”,
 marginBottom: 18
 }
-}, “6-block, 24-week program \xB7 VDOT “, vdot), [0, 1, 2, 3].map(offset => {
+}, “6-block, 24-week program . VDOT “, vdot), [0, 1, 2, 3].map(offset => {
 const tw = blockStartTw + offset;
 const rwi = getRunningWeekInfo(tw);
 const blockNum = rwi.blockNum,
@@ -2922,12 +2922,12 @@ style: {
 fontSize: 14,
 fontWeight: 700
 }
-}, “Week “, weekInBlock, “ \u2014 “, wdef.label), /*#**PURE***/React.createElement(“div”, {
+}, “Week “, weekInBlock, “ – “, wdef.label), /*#**PURE***/React.createElement(“div”, {
 style: {
 fontSize: 11,
 color: “var(–t3)”
 }
-}, fmtShort(weekStart(tw)), “ \u2013 “, fmtShort(weekEnd(tw))))), /*#**PURE***/React.createElement(Row, {
+}, fmtShort(weekStart(tw)), “ - “, fmtShort(weekEnd(tw))))), /*#**PURE***/React.createElement(Row, {
 style: {
 gap: 6
 }
@@ -3069,7 +3069,7 @@ color: “var(–t3)”,
 marginTop: 6,
 textAlign: “right”
 }
-}, miSum, “ mi planned \xB7 tap to open week \u2192”));
+}, miSum, “ mi planned . tap to open week ->”));
 }), /*#**PURE***/React.createElement(“div”, {
 style: {
 marginTop: 8,
@@ -3218,7 +3218,7 @@ marginBottom: 8
 style: {
 fontSize: 13
 }
-}, “VDOT “, vdot, “ \u2192 55”), /*#**PURE***/React.createElement(Mono, {
+}, “VDOT “, vdot, “ -> 55”), /*#**PURE***/React.createElement(Mono, {
 style: {
 fontSize: 12,
 color: “var(–accent)”
@@ -3243,7 +3243,7 @@ fontSize: 11,
 color: “var(–t3)”,
 marginTop: 8
 }
-}, “VDOT prompted at end of each 4-week block. At VDOT 55 \u2192 sign up for a race 12\u201316 weeks out.”)));
+}, “VDOT prompted at end of each 4-week block. At VDOT 55 -> sign up for a race 12-16 weeks out.”)));
 }
 
 // — PAGE: HISTORY ————————————————————
@@ -3432,7 +3432,7 @@ fontSize: 9,
 color: “var(–t3)”,
 marginTop: 4
 }
-}, /*#**PURE***/React.createElement(“span”, null, (_data$ = data[0]) === null || _data$ === void 0 ? void 0 : _data$.date), /*#**PURE***/React.createElement(“span”, null, “\u2190 faster \xB7 slower \u2192”), /*#**PURE***/React.createElement(“span”, null, (_data = data[data.length - 1]) === null || _data === void 0 ? void 0 : _data.date)));
+}, /*#**PURE***/React.createElement(“span”, null, (_data$ = data[0]) === null || _data$ === void 0 ? void 0 : _data$.date), /*#**PURE***/React.createElement(“span”, null, “faster – slower”), /*#**PURE***/React.createElement(“span”, null, (_data = data[data.length - 1]) === null || _data === void 0 ? void 0 : _data.date)));
 };
 return /*#**PURE***/React.createElement(“div”, {
 style: {
@@ -3451,7 +3451,7 @@ fontSize: 13,
 color: “var(–t2)”,
 marginBottom: 14
 }
-}, “Jun 8, 2026 \u2014 present”), /*#**PURE***/React.createElement(“div”, {
+}, “Jun 8, 2026 – present”), /*#**PURE***/React.createElement(“div”, {
 style: {
 display: “grid”,
 gridTemplateColumns: “repeat(3,1fr)”,
@@ -3743,7 +3743,7 @@ style: {
 marginBottom: 12
 }
 }, /*#**PURE***/React.createElement(ST, {
-c: “Running \u2014 VDOT”
+c: “Running – VDOT”
 }), /*#**PURE***/React.createElement(Row, {
 style: {
 marginBottom: 10
@@ -3842,7 +3842,7 @@ style: {
 color: “var(–accent)”,
 fontSize: 11
 }
-}, “strava.com/settings/api”), /*#**PURE***/React.createElement(“br”, null), “2. Create app \u2192 get Client ID + Secret”, /*#**PURE***/React.createElement(“br”, null), “3. Use this app’s URL as redirect URI”, /*#**PURE***/React.createElement(“br”, null), “4. Tap Connect (opens OAuth in browser)”), /*#**PURE***/React.createElement(Btn, {
+}, “strava.com/settings/api”), /*#**PURE***/React.createElement(“br”, null), “2. Create app -> get Client ID + Secret”, /*#**PURE***/React.createElement(“br”, null), “3. Use this app’s URL as redirect URI”, /*#**PURE***/React.createElement(“br”, null), “4. Tap Connect (opens OAuth in browser)”), /*#**PURE***/React.createElement(Btn, {
 v: “ghost”,
 style: {
 fontSize: 12,
@@ -3910,7 +3910,7 @@ color: “var(–accent)”
 style: {
 color: “var(–t3)”
 }
-}, “\xB7training”)), /*#**PURE***/React.createElement(Row, {
+}, “.training”)), /*#**PURE***/React.createElement(Row, {
 style: {
 gap: 6
 }
