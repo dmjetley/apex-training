@@ -27,7 +27,7 @@ const STRAVA_CLIENT_SECRET = "27e97d01183fc2bfc089b587dc32ca82f8c203aa";
 const STRAVA_REDIRECT_URI  = "https://dmjetley.github.io/apex-training/";
 const STRAVA_SCOPE         = "activity:read_all";
 
-var StravaAuth = {
+window.StravaAuth = {
 getTokens: function() {
 try { return JSON.parse(localStorage.getItem(“stravaTokens”)||“null”); } catch(e) { return null; }
 },
@@ -100,10 +100,17 @@ window.location.replace(STRAVA_REDIRECT_URI);
 
 <script>
 (function(){
-  var b=document.getElementById('b64app').textContent.trim();
-  var s=document.createElement('script');
-  s.textContent=decodeURIComponent(escape(atob(b)));
-  document.head.appendChild(s);
+  try {
+    var b=document.getElementById('b64app').textContent.trim();
+    var code=decodeURIComponent(escape(atob(b)));
+    var s=document.createElement('script');
+    s.textContent=code;
+    s.onerror=function(e){document.getElementById('root').innerHTML='<div style="padding:30px;font-family:monospace;color:#f87171;background:#080809">Script inject error: '+JSON.stringify(e)+'</div>';};
+    document.head.appendChild(s);
+  } catch(e) {
+    document.getElementById('root').innerHTML='<div style="padding:30px;font-family:monospace;color:#f87171;background:#080809"><b>Loader error:</b><br><br>'+(e&&e.message||String(e))+'<br><br><pre style="font-size:10px;color:#5a5a64;white-space:pre-wrap">'+(e&&e.stack||'')+'</pre></div>';
+
+}
 })();
 </script>
 
