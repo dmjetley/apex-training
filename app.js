@@ -1,0 +1,4066 @@
+function hexAlpha(hex,alpha){var m={’#38bdf8’:‘56,189,248’,’#fbbf24’:‘251,191,36’,’#e2ff5d’:‘226,255,93’,’#fb923c’:‘251,146,60’,’#a78bfa’:‘167,139,250’,’#f472b6’:‘244,114,182’,’#60a5fa’:‘96,165,250’,’#f87171’:‘248,113,113’,’#4ade80’:‘74,222,128’,’#d6ff4b’:‘214,255,75’,’#fc4c02’:‘252,76,2’};return ‘rgba(’+(m[hex]||‘128,128,128’)+’,’+alpha+’)’;}
+function StravaPanel(){var _s1=React.useState(function(){return StravaAuth.getTokens();}),tokens=_s1[0],setTokens=_s1[1];var _s2=React.useState(false),syncing=_s2[0],setSyncing=_s2[1];var _s3=React.useState(function(){return localStorage.getItem(“stravaLastSync”)||null;}),lastSync=_s3[0],setLastSync=_s3[1];var _s4=React.useState(””),syncMsg=_s4[0],setSyncMsg=_s4[1];var connected=!!(tokens&&tokens.accessToken),athlete=tokens&&tokens.athlete,orange=”#fc4c02”;function sync(){setSyncing(true);setSyncMsg(“Fetching…”);var after=Math.floor(new Date(“2026-06-08”).getTime()/1000);StravaAuth.fetchActivities(after).then(function(activities){var runs=activities.filter(function(a){return a.type===“Run”||a.sport_type===“Run”;});var PROG=new Date(“2026-06-08”),MSW=7*24*3600*1000,imported=0;runs.forEach(function(act){var d=new Date(act.start_date_local),tw=Math.max(1,Math.floor((d-PROG)/MSW)+1);var key=“w”+tw,dow=d.getDay();var sid=dow===0?“Q1”:dow===4?“Q2”:dow===2?“easy”:dow===6?“easy2”:null;if(!sid)return;var dist=Math.round((act.distance/1609.34)*10)/10;var spm=act.moving_time/(act.distance/1609.34);var pace=Math.floor(spm/60)+”:”+String(Math.round(spm%60)).padStart(2,“0”);var ex=JSON.parse(localStorage.getItem(“runLogs5”)||”{}”);if(!ex[key])ex[key]={};if(!ex[key][sid]||!ex[key][sid].stravaId){ex[key][sid]={completed:true,date:d.toLocaleDateString(“en-CA”),distance:dist,actualPace:pace,stravaId:act.id,feel:null,note:“Strava: “+act.name};imported++;}localStorage.setItem(“runLogs5”,JSON.stringify(ex));});var now=new Date().toLocaleString();localStorage.setItem(“stravaLastSync”,now);setLastSync(now);setSyncing(false);setSyncMsg(“Done - “+imported+” runs imported. Reload to see.”);});}var sIcon=React.createElement(“svg”,{width:18,height:18,viewBox:“0 0 24 24”,fill:“white”},React.createElement(“path”,{d:“M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169”}));return React.createElement(“div”,{style:{background:“rgba(252,76,2,0.06)”,border:“1px solid rgba(252,76,2,0.2)”,borderRadius:14,padding:16,marginBottom:12}},React.createElement(“div”,{style:{fontSize:10,fontWeight:700,letterSpacing:“0.12em”,textTransform:“uppercase”,color:”#5a5a64”,marginBottom:10}},“Strava”),connected?React.createElement(“div”,null,React.createElement(“div”,{style:{display:“flex”,alignItems:“center”,gap:10,marginBottom:12}},React.createElement(“div”,{style:{width:36,height:36,borderRadius:“50%”,background:orange,display:“flex”,alignItems:“center”,justifyContent:“center”}},sIcon),React.createElement(“div”,null,React.createElement(“div”,{style:{fontSize:13,fontWeight:700,color:”#f0f0f2”}},“Connected”+(athlete?” - “+athlete.firstname:””)),lastSync?React.createElement(“div”,{style:{fontSize:11,color:”#5a5a64”}},“Last sync: “+lastSync):null)),syncMsg?React.createElement(“div”,{style:{fontSize:12,color:”#9898a3”,marginBottom:10}},syncMsg):null,React.createElement(“div”,{style:{display:“flex”,gap:8}},React.createElement(“button”,{onClick:sync,disabled:syncing,style:{padding:“9px 16px”,borderRadius:10,fontSize:12,fontWeight:600,background:orange,color:”#fff”,border:“none”,cursor:“pointer”,fontFamily:“Syne,sans-serif”}},syncing?“Syncing…”:“Sync Runs”),React.createElement(“button”,{onClick:function(){StravaAuth.clearTokens();setTokens(null);},style:{padding:“9px 16px”,borderRadius:10,fontSize:12,fontWeight:600,background:“transparent”,color:”#9898a3”,border:“1px solid #2c2c31”,cursor:“pointer”,fontFamily:“Syne,sans-serif”}},“Disconnect”))):React.createElement(“div”,null,React.createElement(“div”,{style:{fontSize:12,color:”#9898a3”,marginBottom:12,lineHeight:1.7}},“Connect Strava to auto-import your runs.”),React.createElement(“button”,{onClick:function(){StravaAuth.startOAuth();},style:{display:“inline-flex”,alignItems:“center”,gap:8,padding:“10px 18px”,borderRadius:10,fontSize:13,fontWeight:600,background:orange,color:”#fff”,border:“none”,cursor:“pointer”,fontFamily:“Syne,sans-serif”}},sIcon,” Connect Strava”)));}
+var _OrigPS=PageSettings;
+function PageSettingsWithStrava(props){return React.createElement(“div”,null,React.createElement(_OrigPS,props),React.createElement(“div”,{style:{padding:“0 20px 20px”}},React.createElement(StravaPanel,null)));}
+function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError(“Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.”); }
+function _unsupportedIterableToArray(r, a) { if (r) { if (“string” == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return “Object” === t && r.constructor && (t = r.constructor.name), “Map” === t || “Set” === t ? Array.from(r) : “Arguments” === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : “undefined” != typeof Symbol && r[Symbol.iterator] || r[”@@iterator”]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+const _React = React,
+useState = _React.useState,
+useReducer = _React.useReducer,
+useMemo = _React.useMemo,
+useEffect = _React.useEffect;
+
+// — PROGRAM CONFIG ———————————————————–
+const PROGRAM_START = new Date(“2026-06-08”); // Monday June 8 2026
+const BASE_MILES = 50; // 1.0x
+
+// — 6-BLOCK RUNNING CYCLE —————————————————
+// Each block = 4 weeks. Multipliers x 50mi = target miles.
+// After block 6 it repeats from block 1 until target VDOT is reached.
+// Week 4 of each block always has the LOWEST mileage -> hardest lifting week.
+const RUNNING_BLOCKS = [{
+block: 1,
+weeks: [0.8, 0.9, 0.8, 0.9]
+},
+// 40, 45, 40, 45
+{
+block: 2,
+weeks: [1.0, 0.8, 1.0, 0.9]
+},
+// 50, 40, 50, 45
+{
+block: 3,
+weeks: [1.0, 0.8, 0.9, 0.8]
+},
+// 50, 40, 45, 40
+{
+block: 4,
+weeks: [1.0, 0.9, 0.8, 0.7]
+},
+// 50, 45, 40, 35
+{
+block: 5,
+weeks: [1.0, 0.9, 1.0, 0.8]
+},
+// 50, 45, 50, 40
+{
+block: 6,
+weeks: [1.0, 0.9, 0.9, 0.8]
+} // 50, 45, 45, 40
+];
+
+// For a given total program week (1-indexed), return block, week-in-block (1-4), miles
+function getRunningWeekInfo(totalWeek) {
+const tw = Math.max(1, totalWeek || 1); // guard: never < 1 or undefined
+const posIn24 = ((tw - 1) % 24 + 24) % 24; // always 0-23, safe for any input
+const blockIdx = Math.floor(posIn24 / 4); // 0-5
+const weekInBlock = posIn24 % 4; // 0-3
+const block = RUNNING_BLOCKS[blockIdx] || RUNNING_BLOCKS[0];
+const multiplier = block.weeks[weekInBlock] || 0.8;
+const targetMiles = Math.round(multiplier * BASE_MILES);
+return {
+blockNum: blockIdx + 1,
+// 1-6
+weekInBlock: weekInBlock + 1,
+// 1-4
+multiplier,
+targetMiles,
+isLastWeekOfBlock: weekInBlock === 3
+};
+}
+
+// — LIFTING INTENSITY ALIGNMENT ———————————————
+// Week 4 (lowest run mileage) = hardest lifting (0 RIR target)
+// Week 3 = 1 RIR, Week 2 = 2 RIR, Week 1 = 3 RIR
+// This creates concurrent periodization: when running is hardest, lifting backs off
+const LIFT_RIR_BY_WEEK = {
+1: 3,
+2: 2,
+3: 1,
+4: 0
+};
+const LIFT_INTENSITY_LABEL = {
+1: “Foundation”,
+2: “Accumulation”,
+3: “Intensification”,
+4: “Peak”
+};
+const LIFT_INTENSITY_COLOR = {
+1: “#38bdf8”,
+2: “#fbbf24”,
+3: “#fb923c”,
+4: “#f87171”
+};
+
+// — RUNNING WEEK TYPES (by week-in-block) ———————————–
+// Week 4 always lowest miles -> easy running focus
+const WEEK_IN_BLOCK_DEFS = {
+// Block 1
+“1-1”: {
+label: “Base”,
+Q1type: “easy_strides”,
+Q2type: “easy_long”,
+color: “#38bdf8”,
+desc: “All easy runs. Add strides on 2 days.”
+},
+“1-2”: {
+label: “Threshold”,
+Q1type: “long_late_pickup”,
+Q2type: “T_broken”,
+color: “#fbbf24”,
+desc: “1 long run with late pickup + 1 broken T workout.”
+},
+“1-3”: {
+label: “Base”,
+Q1type: “easy_strides”,
+Q2type: “easy_long”,
+color: “#38bdf8”,
+desc: “Back to easy. Strides on 2 days.”
+},
+“1-4”: {
+label: “Threshold+”,
+Q1type: “T_long_broken”,
+Q2type: “T_track”,
+color: “#fb923c”,
+desc: “2 T workouts – 1 long broken + 1 track with shorter intervals.”
+},
+// Block 2
+“2-1”: {
+label: “Marathon”,
+Q1type: “M_long”,
+Q2type: “M_broken”,
+color: “#e2ff5d”,
+desc: “2 M workouts – long sustained MP + broken MP.”
+},
+“2-2”: {
+label: “Base”,
+Q1type: “easy_strides”,
+Q2type: “easy_long”,
+color: “#38bdf8”,
+desc: “Recovery easy week. Strides on 2 days.”
+},
+“2-3”: {
+label: “Marathon”,
+Q1type: “M_long”,
+Q2type: “M_broken”,
+color: “#e2ff5d”,
+desc: “2 M workouts – long sustained MP + broken MP.”
+},
+“2-4”: {
+label: “Threshold”,
+Q1type: “long_late_pickup”,
+Q2type: “T_broken”,
+color: “#fbbf24”,
+desc: “1 long run with late pickup + 1 broken T workout.”
+},
+// Block 3
+“3-1”: {
+label: “Marathon”,
+Q1type: “M_long”,
+Q2type: “M_broken”,
+color: “#e2ff5d”,
+desc: “2 M workouts – long sustained MP + broken MP.”
+},
+“3-2”: {
+label: “Base”,
+Q1type: “easy_strides”,
+Q2type: “easy_long”,
+color: “#38bdf8”,
+desc: “Recovery easy week. Strides on 2 days.”
+},
+“3-3”: {
+label: “Threshold”,
+Q1type: “T_long_broken”,
+Q2type: “T_track”,
+color: “#fbbf24”,
+desc: “2 T workouts – long broken + track intervals.”
+},
+“3-4”: {
+label: “Base”,
+Q1type: “easy_strides”,
+Q2type: “easy_long”,
+color: “#38bdf8”,
+desc: “Recovery easy week. Lowest mileage.”
+},
+// Block 4
+“4-1”: {
+label: “Marathon”,
+Q1type: “M_long”,
+Q2type: “M_broken”,
+color: “#e2ff5d”,
+desc: “2 M workouts – long sustained MP + broken MP.”
+},
+“4-2”: {
+label: “Threshold”,
+Q1type: “T_long_broken”,
+Q2type: “T_track”,
+color: “#fbbf24”,
+desc: “2 T workouts – long broken + track intervals.”
+},
+“4-3”: {
+label: “Base”,
+Q1type: “easy_strides”,
+Q2type: “easy_long”,
+color: “#38bdf8”,
+desc: “Recovery easy week. Strides on 2 days.”
+},
+“4-4”: {
+label: “Base”,
+Q1type: “easy_strides”,
+Q2type: “easy_long”,
+color: “#38bdf8”,
+desc: “Lowest mileage week. Full recovery – peak lifting.”
+},
+// Block 5
+“5-1”: {
+label: “Marathon”,
+Q1type: “M_long”,
+Q2type: “M_broken”,
+color: “#e2ff5d”,
+desc: “2 M workouts – long sustained MP + broken MP.”
+},
+“5-2”: {
+label: “Threshold”,
+Q1type: “T_long_broken”,
+Q2type: “T_track”,
+color: “#fbbf24”,
+desc: “2 T workouts – long broken + track intervals.”
+},
+“5-3”: {
+label: “Marathon”,
+Q1type: “M_long”,
+Q2type: “M_broken”,
+color: “#e2ff5d”,
+desc: “2 M workouts – peak mileage week.”
+},
+“5-4”: {
+label: “Base”,
+Q1type: “easy_strides”,
+Q2type: “easy_long”,
+color: “#38bdf8”,
+desc: “Recovery easy week. Peak lifting intensity.”
+},
+// Block 6
+“6-1”: {
+label: “Marathon”,
+Q1type: “M_long”,
+Q2type: “M_broken”,
+color: “#e2ff5d”,
+desc: “2 M workouts – long sustained MP + broken MP.”
+},
+“6-2”: {
+label: “Threshold”,
+Q1type: “T_long_broken”,
+Q2type: “T_track”,
+color: “#fbbf24”,
+desc: “2 T workouts – long broken + track intervals.”
+},
+“6-3”: {
+label: “Threshold”,
+Q1type: “long_late_pickup”,
+Q2type: “T_broken”,
+color: “#fbbf24”,
+desc: “Long run with late pickup + broken T workout.”
+},
+“6-4”: {
+label: “Base”,
+Q1type: “easy_strides”,
+Q2type: “easy_long”,
+color: “#38bdf8”,
+desc: “Recovery easy week. Assess VDOT at end.”
+}
+};
+function getWeekDef(blockNum, weekInBlock) {
+const key = `${blockNum}-${weekInBlock}`;
+return WEEK_IN_BLOCK_DEFS[key] || WEEK_IN_BLOCK_DEFS[“1-1”];
+}
+
+// — VDOT PACES —————————————————————
+const VDOT_PACES = {
+46: {
+E: “8:31-9:34”,
+M: “7:49”,
+T: “7:17”,
+I400: “4:12”,
+R400: “1:32”
+},
+47: {
+E: “8:22-9:25”,
+M: “7:40”,
+T: “7:09”,
+I400: “4:07”,
+R400: “1:30”
+},
+48: {
+E: “8:13-9:15”,
+M: “7:32”,
+T: “7:02”,
+I400: “4:03”,
+R400: “1:29”
+},
+49: {
+E: “8:05-9:06”,
+M: “7:24”,
+T: “6:56”,
+I400: “3:59”,
+R400: “1:28”
+},
+50: {
+E: “7:57-8:49”,
+M: “7:17”,
+T: “6:50”,
+I400: “3:55”,
+R400: “1:27”
+},
+51: {
+E: “7:49-8:49”,
+M: “7:09”,
+T: “6:44”,
+I400: “3:51”,
+R400: “1:26”
+},
+52: {
+E: “7:42-8:41”,
+M: “7:02”,
+T: “6:38”,
+I400: “3:48”,
+R400: “1:25”
+},
+53: {
+E: “7:35-8:33”,
+M: “6:56”,
+T: “6:32”,
+I400: “3:44”,
+R400: “1:24”
+},
+54: {
+E: “7:28-8:26”,
+M: “6:49”,
+T: “6:26”,
+I400: “3:41”,
+R400: “1:22”
+},
+55: {
+E: “7:21-8:18”,
+M: “6:43”,
+T: “6:20”,
+I400: “3:37”,
+R400: “1:21”
+}
+};
+
+// — RUN SESSION DEFINITIONS –––––––––––––––––––––––––
+const RUN_DEFS = {
+easy: {
+label: “Easy Run”,
+type: “E”,
+color: “#38bdf8”,
+desc: “Conversational pace throughout. Full sentences the whole way.”,
+scienceNote: “80-85% of your weekly mileage should be easy. Easy running builds capillary density, mitochondrial volume, and fat oxidation capacity – the aerobic engine that quality workouts then tax. Daniels’ research shows that physiological stress from easy running is additive: more easy miles = larger aerobic engine, even without pace increases. On a concurrent training program, easy running also enhances recovery from lifting by increasing blood flow and nutrient delivery to muscles.”,
+getSegs: (p, mi) => [{
+label: “Full Run”,
+pace: p.E,
+dist: `${mi} mi`,
+miles: mi,
+feel: “Conversational – full sentences”
+}],
+getTotalMiles: mi => mi
+},
+easy2: {
+label: “Easy Run”,
+type: “E”,
+color: “#38bdf8”,
+desc: “Recovery easy run. Genuinely easy – err slower rather than faster.”,
+scienceNote: “Saturday’s easy run follows Thursday’s quality session. Running easy the day after harder effort accelerates recovery through increased blood flow while adding aerobic volume. On a hybrid program, Saturday is deliberately easy running + lighter lifting – the concurrent stress is manageable precisely because both stimuli are sub-maximal on this day.”,
+getSegs: (p, mi) => [{
+label: “Full Run”,
+pace: p.E,
+dist: `${mi} mi`,
+miles: mi,
+feel: “Easy, recovery focus”
+}],
+getTotalMiles: mi => mi
+},
+easy_strides: {
+label: “Easy + Strides”,
+type: “E”,
+color: “#38bdf8”,
+desc: “Easy run with 6x 20-second strides at mile effort. Full 90s walk recovery between each.”,
+scienceNote: “Strides are one of the highest ROI tools in distance running. A 20-second acceleration to mile pace costs almost no aerobic or metabolic fatigue but recruits fast-twitch motor units, improves running economy through neuromuscular adaptation, and maintains speed even during base-building. Crucially, on peak lifting weeks (Week 4) strides give your running a neuromuscular stimulus without the aerobic load that would compromise lifting recovery. High reward, minimal concurrent interference.”,
+getSegs: (p, mi) => {
+const totalMi = Math.max(2, Math.round(mi));
+const easyMi = totalMi - 1;
+return [{
+label: “Easy Run”,
+pace: p.E,
+dist: `${easyMi} mi`,
+miles: easyMi,
+feel: “Conversational”
+}, {
+label: “6x Strides”,
+pace: “Mile effort”,
+dist: “~1 mi total (20s on / 90s walk)”,
+miles: 1,
+feel: “Controlled acceleration”
+}];
+},
+getTotalMiles: mi => Math.max(2, Math.round(mi))
+},
+easy_long: {
+label: “Easy Long Run”,
+type: “E”,
+color: “#38bdf8”,
+desc: “Longer easy run. Build aerobic base at purely conversational effort.”,
+scienceNote: “On weeks where both quality slots are easy (Week 1 base, all easy recovery weeks), the Sunday long run provides aerobic stimulus through duration rather than intensity. Glycogen efficiency improves with time-on-feet regardless of pace – you’re training fat oxidation and improving cardiac stroke volume without creating lactate stress. This is particularly valuable on peak lifting weeks where recovery capacity is at a premium.”,
+getSegs: (p, mi) => [{
+label: “Full Run”,
+pace: p.E,
+dist: `${mi} mi`,
+miles: mi,
+feel: “Conversational throughout”
+}],
+getTotalMiles: mi => mi
+},
+long_late_pickup: {
+label: “Long Run + Late Pickup”,
+type: “E/M”,
+color: “#a78bfa”,
+desc: “Long easy run finishing with 3-4 miles at marathon pace.”,
+scienceNote: “The late pickup is physiologically distinct from a fresh MP run. After 12+ easy miles, glycogen stores are partially depleted and fat oxidation is elevated. Switching to marathon pace in this metabolically stressed state trains the exact transition your body must execute in miles 18-26 of a marathon. You’re teaching race-pace mechanics and fat/carbohydrate blending under conditions that match late-race physiology – arguably the most specific marathon adaptation you can create in training.”,
+getSegs: (p, mi) => {
+const totalMi = Math.min(18, Math.max(1, Math.round(mi)));
+const pickup = Math.min(4, Math.max(1, Math.round(totalMi * 0.25)));
+const easy = Math.max(1, totalMi - pickup);
+return [{
+label: “Easy Portion”,
+pace: p.E,
+dist: `${easy} mi`,
+miles: easy,
+feel: “Easy, conversational”
+}, {
+label: “Late Pickup”,
+pace: p.M,
+dist: `${pickup} mi`,
+miles: pickup,
+feel: “Marathon pace – controlled”
+}];
+},
+getTotalMiles: mi => Math.min(18, Math.max(1, Math.round(mi)))
+},
+T_broken: {
+label: “Broken Threshold”,
+type: “T”,
+color: “#fbbf24”,
+desc: “Multiple tempo pieces with easy jog recovery. Comfortably hard – short phrases OK, not full sentences.”,
+scienceNote: “Broken T runs allow you to accumulate more total time at lactate threshold than a single continuous effort. Threshold pace (~1-hour race pace) is the fastest pace at which lactate production equals clearance. Each piece pushes lactate to equilibrium; the recovery jog brings it back down slightly without full recovery, repeatedly stressing the lactate clearance system. This produces greater adaptation in lactate transporters and mitochondrial enzyme activity than one long continuous T run of the same volume.”,
+getSegs: p => [{
+label: “Warm-up”,
+pace: p.E,
+dist: “1.5 mi”,
+miles: 1.5,
+feel: “Easy”
+}, {
+label: “T Piece 1”,
+pace: p.T,
+dist: “2 mi”,
+miles: 2,
+feel: “Comfortably hard”
+}, {
+label: “Recovery”,
+pace: p.E,
+dist: “0.5 mi”,
+miles: 0.5,
+feel: “Easy jog”
+}, {
+label: “T Piece 2”,
+pace: p.T,
+dist: “2 mi”,
+miles: 2,
+feel: “Comfortably hard”
+}, {
+label: “Recovery”,
+pace: p.E,
+dist: “0.5 mi”,
+miles: 0.5,
+feel: “Easy jog”
+}, {
+label: “T Piece 3”,
+pace: p.T,
+dist: “1 mi”,
+miles: 1,
+feel: “Comfortably hard”
+}, {
+label: “Cool-down”,
+pace: p.E,
+dist: “1 mi”,
+miles: 1,
+feel: “Easy”
+}],
+getTotalMiles: () => 1.5 + 2 + 0.5 + 2 + 0.5 + 1 + 1 // 8.5
+},
+T_long_broken: {
+label: “Long Broken Threshold”,
+type: “T”,
+color: “#fbbf24”,
+desc: “Longer broken threshold – 3+3 miles of T pace with recovery jog.”,
+scienceNote: “Week 4 T workouts use a longer broken structure (3+3 vs 2+2+1). By this point in the block your lactate threshold machinery is better conditioned, so you can sustain more total threshold exposure. The 3-mile pieces create longer continuous exposure to lactate equilibrium – driving greater adaptations in MCT4 lactate transporters and complex I/II mitochondrial enzyme activity. This is a more advanced stimulus that directly raises the velocity at lactate threshold.”,
+getSegs: p => [{
+label: “Warm-up”,
+pace: p.E,
+dist: “2 mi”,
+miles: 2,
+feel: “Easy”
+}, {
+label: “T Piece 1”,
+pace: p.T,
+dist: “3 mi”,
+miles: 3,
+feel: “Comfortably hard”
+}, {
+label: “Recovery”,
+pace: p.E,
+dist: “1 mi”,
+miles: 1,
+feel: “Easy jog”
+}, {
+label: “T Piece 2”,
+pace: p.T,
+dist: “3 mi”,
+miles: 3,
+feel: “Comfortably hard”
+}, {
+label: “Cool-down”,
+pace: p.E,
+dist: “2 mi”,
+miles: 2,
+feel: “Easy”
+}],
+getTotalMiles: () => 2 + 3 + 1 + 3 + 2 // 11
+},
+T_track: {
+label: “Track Threshold”,
+type: “T”,
+color: “#fbbf24”,
+desc: “Track workout – 400m, 800m, or 1600m repeats at repetition (R) pace. Faster than threshold.”,
+scienceNote: “Track T workouts use shorter repeats than road threshold runs, letting you accumulate quality volume with better mechanical precision. 400m repeats stress the upper threshold zone and build leg turnover; 800m hits the sweet spot for lactate accumulation and clearance; 1600m builds sustained threshold capacity. Pick the distance based on feel – use 1600s early in a cycle, progress to 800s and 400s as fitness sharpens. The track removes pacing guesswork and makes split data directly comparable week to week.”,
+getSegs: p => [{
+label: “Warm-up”,
+pace: p.E,
+dist: “2 mi”,
+miles: 2,
+feel: “Easy”
+}, {
+label: “Option A: 12x 400m”,
+pace: p.R400,
+dist: “~3 mi total (90s walk/jog)”,
+miles: 3,
+feel: “R pace – fast but controlled, full recovery between”
+}, {
+label: “Option B: 6x 800m”,
+pace: p.R400,
+dist: “~3 mi total (90s walk/jog)”,
+miles: 3,
+feel: “R pace – fast but controlled, full recovery between”
+}, {
+label: “Option C: 4x 1600m”,
+pace: p.T,
+dist: “~4 mi total (90s jog)”,
+miles: 4,
+feel: “T pace – comfortably hard, even splits”
+}, {
+label: “Cool-down”,
+pace: p.E,
+dist: “1.5 mi”,
+miles: 1.5,
+feel: “Easy”
+}],
+getTotalMiles: () => 2 + 3 + 1.5 // ~6.5 (conservative midpoint)
+},
+M_long: {
+label: “Long MP Run”,
+type: “M”,
+color: “#e2ff5d”,
+desc: “Sustained 8-12 miles at marathon pace. The most important workout in the program.”,
+scienceNote: “This is the cornerstone of marathon preparation. Sustained MP running trains the specific metabolic adaptations needed for race day: fat oxidation at race pace, lactate clearance at marathon intensity, cardiovascular efficiency at marathon HR, and neuromuscular groove for race-specific biomechanics. Unlike threshold work you’re not exceeding lactate equilibrium – you’re building capacity to sustain the exact metabolic state of a sub-3 marathon for 26.2 miles. No other workout is more race-specific.”,
+getSegs: (p, mi) => {
+const totalMi = Math.min(18, Math.max(1, Math.round(mi)));
+const wu = 2;
+const mp = Math.min(14, Math.max(8, totalMi - wu - 2));
+const cd = Math.max(1, totalMi - wu - mp);
+return [{
+label: “Warm-up”,
+pace: p.E,
+dist: `${wu} mi`,
+miles: wu,
+feel: “Easy”
+}, {
+label: “MP Block”,
+pace: p.M,
+dist: `${mp} mi`,
+miles: mp,
+feel: “Marathon pace – controlled race effort”
+}, {
+label: “Cool-down”,
+pace: p.E,
+dist: `${cd} mi`,
+miles: cd,
+feel: “Easy”
+}];
+},
+getTotalMiles: mi => Math.min(18, Math.max(1, Math.round(mi)))
+},
+M_broken: {
+label: “Broken MP”,
+type: “M”,
+color: “#e2ff5d”,
+desc: “Two 4-mile marathon pace blocks with a short recovery jog between.”,
+scienceNote: “Broken MP delivers similar cardiovascular stimulus to the long MP run but with a recovery reset that reduces perceived effort – allowing better mechanical form through both blocks. Heart rate stays elevated through the short recovery jog, so the cardiac training effect is nearly identical to continuous MP. Daniels considers broken workouts ~90% as effective as continuous runs at the same intensity, making this an ideal second quality session when cumulative weekly fatigue is higher.”,
+getSegs: p => [{
+label: “Warm-up”,
+pace: p.E,
+dist: “1.5 mi”,
+miles: 1.5,
+feel: “Easy”
+}, {
+label: “MP Blk 1”,
+pace: p.M,
+dist: “4 mi”,
+miles: 4,
+feel: “Marathon pace”
+}, {
+label: “Recovery”,
+pace: p.E,
+dist: “0.5 mi”,
+miles: 0.5,
+feel: “Easy jog”
+}, {
+label: “MP Blk 2”,
+pace: p.M,
+dist: “4 mi”,
+miles: 4,
+feel: “Marathon pace”
+}, {
+label: “Cool-down”,
+pace: p.E,
+dist: “1.5 mi”,
+miles: 1.5,
+feel: “Easy”
+}],
+getTotalMiles: () => 1.5 + 4 + 0.5 + 4 + 1.5 // 11.5
+}
+};
+
+// — MILEAGE HELPERS –––––––––––––––––––––––––––––
+// All run miles are whole positive integers. Long run capped at 18 total miles.
+function wholeMi(n) {
+let min = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
+return Math.max(min, Math.round(n));
+}
+
+// — MILEAGE ALLOCATION —————————————————––
+function allocateMiles(totalMi, blockNum, weekInBlock) {
+const def = getWeekDef(blockNum, weekInBlock);
+const q1def = RUN_DEFS[def.Q1type];
+const q2def = RUN_DEFS[def.Q2type];
+
+// All-easy weeks: distribute evenly across 4 runs
+const allEasy = [“easy_strides”, “easy_long”].includes(def.Q1type) && [“easy_strides”, “easy_long”, “easy”].includes(def.Q2type);
+if (allEasy) {
+const q1Mi = wholeMi(totalMi * 0.24);
+const q2Mi = wholeMi(totalMi * 0.26);
+const e1Mi = wholeMi(totalMi * 0.24);
+const e2Mi = Math.max(1, totalMi - q1Mi - q2Mi - e1Mi);
+return {
+easy: e1Mi,
+Q1: q1Mi,
+easy2: e2Mi,
+Q2: q2Mi
+};
+}
+
+// Q runs have fixed structural totals; cap each at 18 miles max
+const q1Fixed = wholeMi(Math.min(q1def.getTotalMiles(totalMi), 18));
+const q2Fixed = wholeMi(Math.min(q2def.getTotalMiles(totalMi), 18));
+const remaining = totalMi - q1Fixed - q2Fixed;
+const e1Mi = wholeMi(remaining * 0.57);
+const e2Mi = Math.max(1, remaining - e1Mi);
+return {
+easy: e1Mi,
+Q1: q1Fixed,
+easy2: e2Mi,
+Q2: q2Fixed
+};
+}
+
+// — DATE HELPERS ———————————————————––
+const MS_W = 7 * 24 * 3600 * 1000;
+function addDays(d, n) {
+const r = new Date(d);
+r.setDate(r.getDate() + n);
+return r;
+}
+function toYMD(d) {
+return d.toLocaleDateString(“en-CA”);
+}
+function fmtShort(d) {
+return d.toLocaleDateString(“en-US”, {
+month: “short”,
+day: “numeric”
+});
+}
+function fmtFull(d) {
+return d.toLocaleDateString(“en-US”, {
+weekday: “long”,
+month: “long”,
+day: “numeric”,
+year: “numeric”
+});
+}
+function fmtMD(d) {
+return d.toLocaleDateString(“en-US”, {
+month: “short”,
+day: “numeric”
+});
+}
+function totalWeekNum(d) {
+return Math.max(1, Math.floor((d - PROGRAM_START) / MS_W) + 1);
+}
+function weekStart(tw) {
+return addDays(PROGRAM_START, (tw - 1) * 7);
+}
+function weekEnd(tw) {
+return addDays(weekStart(tw), 6);
+}
+function nowWeek() {
+return totalWeekNum(new Date());
+}
+function todayStr() {
+return toYMD(new Date());
+}
+
+// — BUILD WEEK SCHEDULE ——————————————————
+function buildSchedule(tw) {
+const rwInfo = getRunningWeekInfo(tw);
+const blockNum = rwInfo.blockNum,
+weekInBlock = rwInfo.weekInBlock,
+targetMiles = rwInfo.targetMiles;
+const def = getWeekDef(blockNum, weekInBlock);
+const start = weekStart(tw);
+const mi = allocateMiles(targetMiles, blockNum, weekInBlock);
+
+// Always put the LONGEST run of the week on Sunday.
+// Compare all 4 runs: easy (Tue), Q1 (Thu candidate), easy2 (Sat), Q2 (Sun candidate)
+const q1d = RUN_DEFS[def.Q1type];
+const q2d = RUN_DEFS[def.Q2type];
+
+// Find the single largest mileage across all runs
+const allRuns = [{
+def: RUN_DEFS.easy,
+key: “easy”,
+miles: mi.easy,
+id: “easy”,
+day: “tue”
+}, {
+def: q1d,
+key: def.Q1type,
+miles: mi.Q1,
+id: “Q1”,
+day: “thu”
+}, {
+def: RUN_DEFS.easy2,
+key: “easy2”,
+miles: mi.easy2,
+id: “easy2”,
+day: “sat”
+}, {
+def: q2d,
+key: def.Q2type,
+miles: mi.Q2,
+id: “Q2”,
+day: “sun”
+}];
+const maxMiles = Math.max(…allRuns.map(r => r.miles));
+const longestIdx = allRuns.findIndex(r => r.miles === maxMiles);
+
+// The longest run goes to Sunday. If it was already a Q slot, swap normally.
+// If it was an easy run (Tue or Sat), we swap it to Sunday and put the
+// original Sunday Q run in that easy slot instead.
+const sunRun = allRuns[longestIdx];
+
+// For Thursday: pick the larger of the two Q runs (but not the one on Sunday)
+// If the longest was easy_tue, Thursday gets Q1; if longest was easy_sat, Thu gets Q1
+// If longest was Q1 -> Thu gets Q2; if longest was Q2 -> Thu gets Q1
+let thuRun;
+if (longestIdx === 1) {
+// Q1 is longest -> Thu gets Q2
+thuRun = {
+def: q2d,
+key: def.Q2type,
+miles: mi.Q2,
+id: “Q2”
+};
+} else {
+// anything else -> Thu gets Q1 (or Q2 if Q1 ended up on Sunday somehow)
+thuRun = {
+def: q1d,
+key: def.Q1type,
+miles: mi.Q1,
+id: “Q1”
+};
+}
+
+// Easy runs: whichever didn’t go to Sunday stays in its normal slot
+const tueRun = longestIdx === 0 ? {
+def: RUN_DEFS.easy2,
+key: “easy2”,
+miles: mi.easy2
+} // easy was moved to Sun, use easy2
+: {
+def: RUN_DEFS.easy,
+key: “easy”,
+miles: mi.easy
+};
+const satRun = longestIdx === 2 ? {
+def: RUN_DEFS.easy,
+key: “easy”,
+miles: mi.easy
+} // easy2 was moved to Sun, use easy
+: {
+def: RUN_DEFS.easy2,
+key: “easy2”,
+miles: mi.easy2
+};
+return [{
+id: “pull”,
+date: addDays(start, 0),
+day: “Mon”,
+type: “lift”,
+label: “Pull”,
+liftKey: “pull”
+}, {
+id: tueRun.key,
+date: addDays(start, 1),
+day: “Tue”,
+type: “run”,
+label: tueRun.def.label,
+runKey: tueRun.key,
+miles: tueRun.miles,
+runDef: tueRun.def
+}, {
+id: “push”,
+date: addDays(start, 2),
+day: “Wed”,
+type: “lift”,
+label: “Push”,
+liftKey: “push”
+}, {
+id: thuRun.id,
+date: addDays(start, 3),
+day: “Thu”,
+type: “run”,
+label: thuRun.def.label,
+runKey: thuRun.key,
+miles: thuRun.miles,
+runDef: thuRun.def
+}, {
+id: “legs”,
+date: addDays(start, 4),
+day: “Fri”,
+type: “lift”,
+label: “Legs”,
+liftKey: “legs”
+}, {
+id: satRun.key,
+date: addDays(start, 5),
+day: “Sat”,
+type: “run”,
+label: satRun.def.label,
+runKey: satRun.key,
+miles: satRun.miles,
+runDef: satRun.def
+}, {
+id: “sharms”,
+date: addDays(start, 5),
+day: “Sat”,
+type: “lift”,
+label: “Shoulders & Arms”,
+liftKey: “sharms”
+}, {
+id: sunRun.id,
+date: addDays(start, 6),
+day: “Sun”,
+type: “run”,
+label: sunRun.def.label,
+runKey: sunRun.key,
+miles: sunRun.miles,
+runDef: sunRun.def
+}];
+}
+
+// — LIFT SESSIONS ———————————————————––
+const LIFT_SCIENCE = {
+pull: “Pull day targets lats and elbow flexors. Pull-ups are first when you’re freshest – highest neuromuscular demand, best carryover to lat width. Rows follow for mid-back thickness (rhomboids, middle traps) that pull-ups underload. Curls last when biceps are pre-fatigued from compound pulling, increasing relative stimulus without adding absolute load. On Week 4 (peak intensity), target 0 RIR – you have the most recovery capacity available because running is at its lightest.”,
+push: “Push day hits upper chest and deltoids first when you’re strongest. Incline movements are prioritized over flat pressing for hybrid athletes – the angle reduces shoulder impingement risk from cumulative overhead running stress and builds the upper chest/anterior deltoid. Lateral raises placed after pressing pre-exhaust the medial deltoid for the overhead extension sets. The lifting intensity ramps across the 4-week block inverse to running load.”,
+legs: “Leg day is quad-dominant, deliberately. Front squats over back squats for hybrid athletes: upright torso reduces spinal load when you’re accumulating running stress, while maximizing quad recruitment. RDLs provide hinge pattern and posterior chain work. Bulgarians are placed after bilateral work – more specific to running’s single-leg mechanics and expose asymmetries that bilateral squats mask. On Week 4 (0 RIR), push Bulgarian depth and load since running is easy this week.”,
+sharms: “Saturday Shoulders & Arms uses a lower systemic profile, deliberately – you’ve run easy that morning and have a quality run Sunday. Shoulder pressing is first so the primary mover isn’t pre-fatigued. Bicep/tricep work uses antagonistic pairings – curl then overhead extension – maintaining elbow blood flow and reducing rest time. This session is intentionally submaximal to protect Sunday’s quality run.”
+};
+const LIFT_EX_NOTES = {
+“Pull-Ups”: “First when fresh – highest neuromuscular demand, best carryover to lat width. BW = lower load on peak running weeks.”,
+“Row”: “Horizontal pull balances the vertical pull-up. Targets mid-back thickness (rhomboids, mid-traps) that pull-ups underload.”,
+“Neutral Grip Pulldown”: “Neutral grip reduces wrist/elbow stress. Drop set extends time under tension without adding systemic fatigue.”,
+“EZ-Bar Curl”: “EZ bar reduces wrist supination stress. Compound bicep lift first when freshest from compound pulling.”,
+“Incline DB Curl”: “Incline stretches the bicep at the bottom – peak stretch = peak mechanical tension = superior hypertrophic stimulus.”,
+“Smith Machine Incline”: “Smith removes stabilization demand, letting you focus entirely on pec/delt recruitment. Safer heavy incline work without a spotter.”,
+“Incline DB Press”: “Post-Smith, DBs allow full retraction and greater stretch at the bottom – targeting upper chest fibers the Smith position partially cuts off.”,
+“DB Lateral Raise”: “Most direct medial deltoid stimulus. Drop set on set 3 keeps TUT high – medial delts respond well to volume.”,
+“Rope Overhead Ext”: “Overhead position maximally stretches the long head of the tricep – the largest head, most responsive to stretch-focused loading.”,
+“Straight Pushdown”: “Lateral head-dominant. Paired with overhead ext to hit all three heads across both exercises.”,
+“Front Squat”: “Upright torso = lower spinal load. Higher quad recruitment than back squat. Better choice when managing cumulative running fatigue.”,
+“RDL”: “Constant hamstring tension through ROM – superior hypertrophic stimulus vs conventional deadlift. Trains hamstrings in the lengthened position.”,
+“Bulgarian Split Squat”: “Unilateral loading exposes asymmetries. Specific to running’s single-leg mechanics. High quad/glute stimulus per set.”,
+“Hyperextensions”: “Trains spinal erectors and glutes at long muscle lengths – complementary to RDLs which train them shortened. Low spinal load.”,
+“Shoulder Press”: “Overhead press before laterals so the primary mover (anterior/medial delt) isn’t pre-fatigued going into the main lift.”
+};
+const LIFTS = {
+pull: {
+label: “Pull”,
+color: “#60a5fa”,
+scienceKey: “pull”,
+exercises: [{
+name: “Pull-Ups”,
+sets: 4,
+repRange: “5-8”,
+rir: 3,
+notes: “”
+}, {
+name: “Row”,
+sets: 3,
+repRange: “8-12”,
+rir: 3,
+notes: “”
+}, {
+name: “Neutral Grip Pulldown”,
+sets: 2,
+repRange: “10-15”,
+rir: 3,
+notes: “Drop second set”
+}, {
+name: “EZ-Bar Curl”,
+sets: 3,
+repRange: “10-15”,
+rir: 3,
+notes: “”
+}, {
+name: “Incline DB Curl”,
+sets: 3,
+repRange: “10-15”,
+rir: 3,
+notes: “Myorep third set”
+}]
+},
+push: {
+label: “Push”,
+color: “#fb923c”,
+scienceKey: “push”,
+exercises: [{
+name: “Smith Machine Incline”,
+sets: 3,
+repRange: “8-12”,
+rir: 3,
+notes: “”
+}, {
+name: “Incline DB Press”,
+sets: 2,
+repRange: “10-15”,
+rir: 3,
+notes: “”
+}, {
+name: “DB Lateral Raise”,
+sets: 3,
+repRange: “15-20”,
+rir: 3,
+notes: “Drop third set”
+}, {
+name: “Rope Overhead Ext”,
+sets: 3,
+repRange: “10-15”,
+rir: 3,
+notes: “”
+}, {
+name: “Straight Pushdown”,
+sets: 3,
+repRange: “12-20”,
+rir: 3,
+notes: “Myorep third set”
+}]
+},
+legs: {
+label: “Legs”,
+color: “#a78bfa”,
+scienceKey: “legs”,
+exercises: [{
+name: “Front Squat”,
+sets: 3,
+repRange: “6-10”,
+rir: 3,
+notes: “”
+}, {
+name: “RDL”,
+sets: 3,
+repRange: “8-12”,
+rir: 3,
+notes: “”
+}, {
+name: “Bulgarian Split Squat”,
+sets: 3,
+repRange: “10-12”,
+rir: 3,
+notes: “”
+}, {
+name: “Hyperextensions”,
+sets: 3,
+repRange: “12-15”,
+rir: 3,
+notes: “”
+}]
+},
+sharms: {
+label: “Shoulders & Arms”,
+color: “#f472b6”,
+scienceKey: “sharms”,
+exercises: [{
+name: “Shoulder Press”,
+sets: 3,
+repRange: “8-12”,
+rir: 3,
+notes: “”
+}, {
+name: “DB Lateral Raise”,
+sets: 3,
+repRange: “15-20”,
+rir: 3,
+notes: “Drop third set”
+}, {
+name: “EZ-Bar Curl”,
+sets: 3,
+repRange: “10-15”,
+rir: 3,
+notes: “”
+}, {
+name: “Rope Overhead Ext”,
+sets: 3,
+repRange: “10-15”,
+rir: 3,
+notes: “”
+}, {
+name: “Incline DB Curl”,
+sets: 2,
+repRange: “10-15”,
+rir: 3,
+notes: “Myorep second set”
+}, {
+name: “Straight Pushdown”,
+sets: 2,
+repRange: “12-20”,
+rir: 3,
+notes: “Myorep second set”
+}]
+}
+};
+const FEEL = [{
+v: 1,
+label: “Terrible”,
+e: “[x]”
+}, {
+v: 2,
+label: “Very Hard”,
+e: “(hard)”
+}, {
+v: 3,
+label: “Hard”,
+e: “(sweat)”
+}, {
+v: 4,
+label: “OK”,
+e: “(ok)”
+}, {
+v: 5,
+label: “Good”,
+e: “:)”
+}, {
+v: 6,
+label: “Strong”,
+e: “(strong)”
+}, {
+v: 7,
+label: “Easy”,
+e: “(easy)”
+}];
+
+// — STORAGE ——————————————————————
+const LS = {
+g: function (k) {
+let d = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+try {
+const v = localStorage.getItem(k);
+return v != null ? JSON.parse(v) : d;
+} catch {
+return d;
+}
+},
+s: (k, v) => {
+try {
+localStorage.setItem(k, JSON.stringify(v));
+} catch {}
+}
+};
+const initState = () => ({
+vdot: LS.g(“vdot5”, 46),
+viewWeek: LS.g(“viewWeek5”, nowWeek()),
+liftLogs: LS.g(“liftLogs5”, {}),
+runLogs: LS.g(“runLogs5”, {}),
+overloadFlags: LS.g(“overloadFlags5”, {}),
+vdotPromptDismissed: LS.g(“vdotPromptDismissed5”, [])
+});
+function wkKey(tw) {
+return `w${tw}`;
+}
+function checkOverload(logs, exName) {
+const hits = [];
+Object.values(logs).forEach(wk => Object.values(wk).forEach(s => {
+var _s$exName;
+if (s !== null && s !== void 0 && (_s$exName = s[exName]) !== null && _s$exName !== void 0 && (_s$exName = _s$exName.sets) !== null && _s$exName !== void 0 && _s$exName.length) hits.push(s[exName]);
+}));
+hits.sort((a, b) => (a.date || “”).localeCompare(b.date || “”));
+if (hits.length < 2) return null;
+const last = hits[hits.length - 1],
+prev = hits[hits.length - 2];
+const avgRir = last.sets.reduce((s, r) => s + parseFloat(r.rir || 3), 0) / last.sets.length;
+const lastVol = last.sets.reduce((s, r) => s + (parseFloat(r.reps) || 0) * (parseFloat(r.weight) || 0), 0);
+const prevVol = prev.sets.reduce((s, r) => s + (parseFloat(r.reps) || 0) * (parseFloat(r.weight) || 0), 0);
+if (avgRir <= 1.5) return {
+kind: “go”,
+msg: `Avg RIR ${avgRir.toFixed(1)} -- consider increasing weight or reps`
+};
+if (lastVol > 0 && lastVol < prevVol * 0.92) return {
+kind: “warn”,
+msg: “Volume dropped vs last session – check fatigue”
+};
+return null;
+}
+
+// — REDUCER ——————————————————————
+function reducer(s, a) {
+switch (a.type) {
+case “VDOT”:
+{
+LS.s(“vdot5”, a.v);
+return {
+…s,
+vdot: a.v
+};
+}
+case “VIEW_WEEK”:
+{
+LS.s(“viewWeek5”, a.w);
+return {
+…s,
+viewWeek: a.w
+};
+}
+case “SAVE_LIFT”:
+{
+var _LIFTS$a$session;
+const ll = {
+…s.liftLogs,
+[a.wk]: {
+…(s.liftLogs[a.wk] || {}),
+[a.session]: a.data
+}
+};
+LS.s(“liftLogs5”, ll);
+const flags = {};
+(((_LIFTS$a$session = LIFTS[a.session]) === null || _LIFTS$a$session === void 0 ? void 0 : _LIFTS$a$session.exercises) || []).forEach(ex => {
+const f = checkOverload(ll, ex.name);
+if (f) flags[ex.name] = f;
+});
+LS.s(“overloadFlags5”, flags);
+return {
+…s,
+liftLogs: ll,
+overloadFlags: flags
+};
+}
+case “SAVE_RUN”:
+{
+const rl = {
+…s.runLogs,
+[a.wk]: {
+…(s.runLogs[a.wk] || {}),
+[a.session]: a.data
+}
+};
+LS.s(“runLogs5”, rl);
+return {
+…s,
+runLogs: rl
+};
+}
+case “DISMISS_VDOT_PROMPT”:
+{
+const d = […s.vdotPromptDismissed, a.blockEnd];
+LS.s(“vdotPromptDismissed5”, d);
+return {
+…s,
+vdotPromptDismissed: d
+};
+}
+default:
+return s;
+}
+}
+
+// — CSS –––––––––––––––––––––––––––––––––––
+const CSS = `@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap'); *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;} :root{ --bg:#080809;--s1:#0f0f11;--s2:#161618;--s3:#1e1e21; --b1:#2c2c31;--b2:#38383f; --t1:#f0f0f2;--t2:#9898a3;--t3:#5a5a64; --accent:#d6ff4b;--acc2:#a8cc38; --run:#38bdf8;--lift:#fb923c;--warn:#fbbf24;--ok:#4ade80;--err:#f87171;--purple:#a78bfa; --r:14px;--r2:10px;--mono:'IBM Plex Mono',monospace; } body{background:var(--bg);color:var(--t1);font-family:'Syne',sans-serif;-webkit-font-smoothing:antialiased;font-size:14px;} input,textarea{font-family:'Syne',sans-serif;font-size:13px;color:var(--t1);background:var(--s3);border:1px solid var(--b1);border-radius:var(--r2);padding:9px 12px;outline:none;width:100%;transition:border-color .15s;} input:focus,textarea:focus{border-color:var(--accent);} button{font-family:'Syne',sans-serif;cursor:pointer;border:none;outline:none;} ::-webkit-scrollbar{width:3px;height:3px;} ::-webkit-scrollbar-thumb{background:var(--b1);border-radius:4px;}`;
+
+// — ICONS ––––––––––––––––––––––––––––––––––
+const Ic = {
+week: () => /*#**PURE***/React.createElement(“svg”, {
+width: 20,
+height: 20,
+viewBox: “0 0 24 24”,
+fill: “none”,
+stroke: “currentColor”,
+strokeWidth: “1.8”
+}, /*#**PURE***/React.createElement(“rect”, {
+x: “3”,
+y: “4”,
+width: “18”,
+height: “18”,
+rx: “2”
+}), /*#**PURE***/React.createElement(“line”, {
+x1: “16”,
+y1: “2”,
+x2: “16”,
+y2: “6”
+}), /*#**PURE***/React.createElement(“line”, {
+x1: “8”,
+y1: “2”,
+x2: “8”,
+y2: “6”
+}), /*#**PURE***/React.createElement(“line”, {
+x1: “3”,
+y1: “10”,
+x2: “21”,
+y2: “10”
+})),
+hist: () => /*#**PURE***/React.createElement(“svg”, {
+width: 20,
+height: 20,
+viewBox: “0 0 24 24”,
+fill: “none”,
+stroke: “currentColor”,
+strokeWidth: “1.8”
+}, /*#**PURE***/React.createElement(“polyline”, {
+points: “22 12 18 12 15 21 9 3 6 12 2 12”
+})),
+gear: () => /*#**PURE***/React.createElement(“svg”, {
+width: 20,
+height: 20,
+viewBox: “0 0 24 24”,
+fill: “none”,
+stroke: “currentColor”,
+strokeWidth: “1.8”
+}, /*#**PURE***/React.createElement(“circle”, {
+cx: “12”,
+cy: “12”,
+r: “3”
+}), /*#**PURE***/React.createElement(“path”, {
+d: “M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z”
+})),
+cycle: () => /*#**PURE***/React.createElement(“svg”, {
+width: 20,
+height: 20,
+viewBox: “0 0 24 24”,
+fill: “none”,
+stroke: “currentColor”,
+strokeWidth: “1.8”
+}, /*#**PURE***/React.createElement(“polyline”, {
+points: “23 4 23 10 17 10”
+}), /*#**PURE***/React.createElement(“path”, {
+d: “M20.49 15a9 9 0 1 1-2.12-9.36L23 10”
+})),
+check: function () {
+let s = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 16;
+return /*#**PURE***/React.createElement(“svg”, {
+width: s,
+height: s,
+viewBox: “0 0 24 24”,
+fill: “none”,
+stroke: “currentColor”,
+strokeWidth: “2.5”
+}, /*#**PURE***/React.createElement(“polyline”, {
+points: “20 6 9 17 4 12”
+}));
+},
+plus: () => /*#**PURE***/React.createElement(“svg”, {
+width: 16,
+height: 16,
+viewBox: “0 0 24 24”,
+fill: “none”,
+stroke: “currentColor”,
+strokeWidth: “2”
+}, /*#**PURE***/React.createElement(“line”, {
+x1: “12”,
+y1: “5”,
+x2: “12”,
+y2: “19”
+}), /*#**PURE***/React.createElement(“line”, {
+x1: “5”,
+y1: “12”,
+x2: “19”,
+y2: “12”
+})),
+right: () => /*#**PURE***/React.createElement(“svg”, {
+width: 16,
+height: 16,
+viewBox: “0 0 24 24”,
+fill: “none”,
+stroke: “currentColor”,
+strokeWidth: “2”
+}, /*#**PURE***/React.createElement(“polyline”, {
+points: “9 18 15 12 9 6”
+})),
+left: () => /*#**PURE***/React.createElement(“svg”, {
+width: 16,
+height: 16,
+viewBox: “0 0 24 24”,
+fill: “none”,
+stroke: “currentColor”,
+strokeWidth: “2”
+}, /*#**PURE***/React.createElement(“polyline”, {
+points: “15 18 9 12 15 6”
+})),
+flag: () => /*#**PURE***/React.createElement(“svg”, {
+width: 16,
+height: 16,
+viewBox: “0 0 24 24”,
+fill: “none”,
+stroke: “currentColor”,
+strokeWidth: “1.8”
+}, /*#**PURE***/React.createElement(“path”, {
+d: “M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z”
+}), /*#**PURE***/React.createElement(“line”, {
+x1: “4”,
+y1: “22”,
+x2: “4”,
+y2: “15”
+})),
+trash: () => /*#**PURE***/React.createElement(“svg”, {
+width: 14,
+height: 14,
+viewBox: “0 0 24 24”,
+fill: “none”,
+stroke: “currentColor”,
+strokeWidth: “1.8”
+}, /*#**PURE***/React.createElement(“polyline”, {
+points: “3 6 5 6 21 6”
+}), /*#**PURE***/React.createElement(“path”, {
+d: “M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2”
+})),
+strava: () => /*#**PURE***/React.createElement(“svg”, {
+width: 18,
+height: 18,
+viewBox: “0 0 24 24”,
+fill: “currentColor”
+}, /*#**PURE***/React.createElement(“path”, {
+d: “M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169”
+})),
+run: () => /*#**PURE***/React.createElement(“svg”, {
+width: 20,
+height: 20,
+viewBox: “0 0 24 24”,
+fill: “none”,
+stroke: “currentColor”,
+strokeWidth: “1.8”
+}, /*#**PURE***/React.createElement(“circle”, {
+cx: “15”,
+cy: “4”,
+r: “1.5”
+}), /*#**PURE***/React.createElement(“path”, {
+d: “M9 17l2-5 3 2 2-4”
+}), /*#**PURE***/React.createElement(“path”, {
+d: “M6 20l3.5-5 3 2 2-4 3.5 1”
+})),
+lift: () => /*#**PURE***/React.createElement(“svg”, {
+width: 20,
+height: 20,
+viewBox: “0 0 24 24”,
+fill: “none”,
+stroke: “currentColor”,
+strokeWidth: “1.8”
+}, /*#**PURE***/React.createElement(“path”, {
+d: “M6 4v16M18 4v16M6 12h12M4 6h4M4 18h4M16 6h4M16 18h4”
+})),
+flask: () => /*#**PURE***/React.createElement(“svg”, {
+width: 14,
+height: 14,
+viewBox: “0 0 24 24”,
+fill: “none”,
+stroke: “currentColor”,
+strokeWidth: “1.8”
+}, /*#**PURE***/React.createElement(“path”, {
+d: “M9 3h6m-5 0v6l-4 9a1 1 0 0 0 .9 1.5h10.2a1 1 0 0 0 .9-1.5L14 9V3”
+})),
+info: () => /*#**PURE***/React.createElement(“svg”, {
+width: 13,
+height: 13,
+viewBox: “0 0 24 24”,
+fill: “none”,
+stroke: “currentColor”,
+strokeWidth: “2”
+}, /*#**PURE***/React.createElement(“circle”, {
+cx: “12”,
+cy: “12”,
+r: “10”
+}), /*#**PURE***/React.createElement(“line”, {
+x1: “12”,
+y1: “8”,
+x2: “12”,
+y2: “12”
+}), /*#**PURE***/React.createElement(“line”, {
+x1: “12”,
+y1: “16”,
+x2: “12.01”,
+y2: “16”
+})),
+star: () => /*#**PURE***/React.createElement(“svg”, {
+width: 16,
+height: 16,
+viewBox: “0 0 24 24”,
+fill: “currentColor”,
+stroke: “none”
+}, /*#**PURE***/React.createElement(“path”, {
+d: “M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z”
+}))
+};
+
+// — PRIMITIVES —————————————————————
+const Card = _ref => {
+let children = _ref.children,
+style = _ref.style,
+onClick = _ref.onClick;
+return /*#**PURE***/React.createElement(“div”, {
+onClick: onClick,
+style: {
+background: “var(–s1)”,
+border: “1px solid var(–b1)”,
+borderRadius: “var(–r)”,
+padding: 16,
+…style
+}
+}, children);
+};
+const Pill = _ref2 => {
+let _ref2$color = _ref2.color,
+color = _ref2$color === void 0 ? “var(–accent)” : _ref2$color,
+children = _ref2.children,
+sm = _ref2.sm;
+return /*#**PURE***/React.createElement(“span”, {
+style: {
+display: “inline-flex”,
+alignItems: “center”,
+gap: 4,
+padding: sm ? “2px 7px” : “3px 10px”,
+borderRadius: 20,
+background: hexAlpha(color,0.14),
+color,
+fontSize: sm ? 10 : 11,
+fontWeight: 600,
+letterSpacing: “0.05em”,
+textTransform: “uppercase”
+}
+}, children);
+};
+const Btn = _ref3 => {
+let children = _ref3.children,
+onClick = _ref3.onClick,
+_ref3$v = _ref3.v,
+v = _ref3$v === void 0 ? “primary” : _ref3$v,
+style = _ref3.style,
+disabled = _ref3.disabled;
+const vs = {
+primary: {
+background: “var(–accent)”,
+color: “#080809”
+},
+ghost: {
+background: “transparent”,
+color: “var(–t1)”,
+border: “1px solid var(–b1)”
+},
+subtle: {
+background: “var(–s3)”,
+color: “var(–t1)”
+},
+ok: {
+background: “rgba(74,222,128,0.15)”,
+color: “var(–ok)”,
+border: “1px solid rgba(74,222,128,0.30)”
+}
+};
+return /*#**PURE***/React.createElement(“button”, {
+onClick: onClick,
+disabled: disabled,
+style: {
+display: “inline-flex”,
+alignItems: “center”,
+justifyContent: “center”,
+gap: 6,
+padding: “10px 18px”,
+borderRadius: “var(–r2)”,
+fontSize: 13,
+fontWeight: 600,
+cursor: disabled ? “default” : “pointer”,
+opacity: disabled ? 0.4 : 1,
+…vs[v],
+…style
+}
+}, children);
+};
+const ST = _ref4 => {
+let c = _ref4.c;
+return /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 10,
+fontWeight: 700,
+letterSpacing: “0.12em”,
+textTransform: “uppercase”,
+color: “var(–t3)”,
+marginBottom: 10
+}
+}, c);
+};
+const Row = _ref5 => {
+let children = _ref5.children,
+style = _ref5.style;
+return /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “flex”,
+alignItems: “center”,
+gap: 8,
+…style
+}
+}, children);
+};
+const SB = _ref6 => {
+let children = _ref6.children,
+style = _ref6.style;
+return /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “flex”,
+alignItems: “center”,
+justifyContent: “space-between”,
+…style
+}
+}, children);
+};
+const Mono = _ref7 => {
+let children = _ref7.children,
+style = _ref7.style;
+return /*#**PURE***/React.createElement(“span”, {
+style: {
+fontFamily: “var(–mono)”,
+…style
+}
+}, children);
+};
+function typeColor(t) {
+return {
+E: “var(–run)”,
+“E/M”: “var(–purple)”,
+T: “var(–warn)”,
+M: “var(–accent)”
+}[t] || “var(–t2)”;
+}
+
+// — SCIENCE NOTE ———————————————————––
+function ScienceNote(_ref8) {
+let text = _ref8.text;
+const _useState = useState(false),
+_useState2 = _slicedToArray(_useState, 2),
+open = _useState2[0],
+setOpen = _useState2[1];
+return /*#**PURE***/React.createElement(“div”, {
+style: {
+marginBottom: 12
+}
+}, /*#**PURE***/React.createElement(“button”, {
+onClick: () => setOpen(!open),
+style: {
+display: “flex”,
+alignItems: “center”,
+gap: 6,
+background: “#111309”,
+border: “1px solid rgba(214,255,75,0.22)”,
+borderRadius: open ? “var(–r2) var(–r2) 0 0” : “var(–r2)”,
+padding: “8px 12px”,
+color: “var(–acc2)”,
+fontSize: 12,
+fontWeight: 600,
+width: “100%”,
+cursor: “pointer”
+}
+}, Ic.flask(), “ The Science “, open ? “^” : “v”), open && /*#**PURE***/React.createElement(“div”, {
+style: {
+background: “#111208”,
+border: “1px solid rgba(214,255,75,0.15)”,
+borderTop: “none”,
+borderRadius: “0 0 var(–r2) var(–r2)”,
+padding: “12px 14px”
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 12,
+color: “var(–t2)”,
+lineHeight: 1.8
+}
+}, text)));
+}
+
+// — VDOT PROMPT BANNER —————————————————––
+function VdotPrompt(_ref9) {
+let vdot = _ref9.vdot,
+blockEndWeek = _ref9.blockEndWeek,
+dismissed = _ref9.dismissed,
+onDismiss = _ref9.onDismiss,
+onUpdate = _ref9.onUpdate;
+const _useState3 = useState(vdot + 1),
+_useState4 = _slicedToArray(_useState3, 2),
+newV = _useState4[0],
+setNewV = _useState4[1];
+const _useState5 = useState(false),
+_useState6 = _slicedToArray(_useState5, 2),
+open = _useState6[0],
+setOpen = _useState6[1];
+if (dismissed) return null;
+return /*#**PURE***/React.createElement(“div”, {
+style: {
+background: “linear-gradient(135deg,rgba(214,255,75,0.12),#0b1510)”,
+border: “1px solid rgba(214,255,75,0.35)”,
+borderRadius: “var(–r)”,
+padding: 16,
+marginBottom: 14
+}
+}, /*#**PURE***/React.createElement(Row, {
+style: {
+marginBottom: 8
+}
+}, /*#**PURE***/React.createElement(“span”, {
+style: {
+color: “var(–accent)”
+}
+}, Ic.star()), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 14,
+fontWeight: 700
+}
+}, “4-Week Block Complete – Assess VDOT”)), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 12,
+color: “var(–t2)”,
+marginBottom: 12,
+lineHeight: 1.7
+}
+}, “You’ve finished a full 4-week running block. Time to assess your fitness. Run a recent race or a 3-mile time trial, then update your VDOT. If it feels right, bump it by 1 and continue.”), !open ? /*#**PURE***/React.createElement(Row, {
+style: {
+gap: 8
+}
+}, /*#**PURE***/React.createElement(Btn, {
+onClick: () => setOpen(true),
+style: {
+fontSize: 12,
+padding: “8px 14px”
+}
+}, “Update VDOT”), /*#**PURE***/React.createElement(Btn, {
+v: “ghost”,
+onClick: onDismiss,
+style: {
+fontSize: 12,
+padding: “8px 14px”
+}
+}, “Keep “, vdot, “ for now”)) : /*#**PURE***/React.createElement(Row, {
+style: {
+gap: 8
+}
+}, /*#**PURE***/React.createElement(“input”, {
+type: “number”,
+value: newV,
+onChange: e => setNewV(Number(e.target.value)),
+min: vdot,
+max: 55,
+style: {
+width: 80
+}
+}), /*#**PURE***/React.createElement(Btn, {
+onClick: () => {
+onUpdate(newV);
+onDismiss();
+},
+style: {
+fontSize: 12,
+padding: “8px 14px”
+}
+}, “Set VDOT “, newV), /*#**PURE***/React.createElement(Btn, {
+v: “ghost”,
+onClick: () => setOpen(false),
+style: {
+fontSize: 12,
+padding: “8px 14px”
+}
+}, “Cancel”)));
+}
+
+// — LIFT LOGGER –––––––––––––––––––––––––––––––
+function LiftLogger(_ref0) {
+var _liftLogs$weekKey;
+let sessionKey = _ref0.sessionKey,
+weekKey = _ref0.weekKey,
+liftLogs = _ref0.liftLogs,
+targetRir = _ref0.targetRir,
+onSave = _ref0.onSave,
+onClose = _ref0.onClose;
+const def = LIFTS[sessionKey];
+const existing = ((_liftLogs$weekKey = liftLogs[weekKey]) === null || _liftLogs$weekKey === void 0 ? void 0 : _liftLogs$weekKey[sessionKey]) || {};
+const _useState7 = useState(0),
+_useState8 = _slicedToArray(_useState7, 2),
+ai = _useState8[0],
+setAi = _useState8[1];
+const _useState9 = useState(() => def.exercises.map(ex => {
+var _existing$ex$name;
+return {
+name: ex.name,
+repRange: ex.repRange,
+notes: ex.notes,
+sets: ((_existing$ex$name = existing[ex.name]) === null || _existing$ex$name === void 0 ? void 0 : _existing$ex$name.sets) || Array.from({
+length: ex.sets
+}, () => ({
+reps: “”,
+weight: “”,
+rir: “”
+}))
+};
+})),
+_useState0 = _slicedToArray(_useState9, 2),
+exData = _useState0[0],
+setExData = _useState0[1];
+const _useState1 = useState(existing.sessionNote || “”),
+_useState10 = _slicedToArray(_useState1, 2),
+note = _useState10[0],
+setNote = *useState10[1];
+const upd = (ei, si, f, v) => setExData(p => p.map((e, i) => i !== ei ? e : {
+…e,
+sets: e.sets.map((s, j) => j !== si ? s : {
+…s,
+[f]: v
+})
+}));
+const addSet = ei => setExData(p => p.map((e, i) => i !== ei ? e : {
+…e,
+sets: […e.sets, {
+reps: “”,
+weight: “”,
+rir: “”
+}]
+}));
+const rmSet = (ei, si) => setExData(p => p.map((e, i) => i !== ei ? e : {
+…e,
+sets: e.sets.filter((*, j) => j !== si)
+}));
+const save = () => {
+const data = {
+sessionNote: note,
+completed: true,
+date: todayStr()
+};
+exData.forEach(ex => {
+data[ex.name] = {
+sets: ex.sets,
+date: todayStr()
+};
+});
+onSave(data);
+};
+const ex = exData[ai];
+return /*#**PURE***/React.createElement(“div”, {
+style: {
+position: “fixed”,
+inset: 0,
+background: “var(–bg)”,
+zIndex: 300,
+overflowY: “auto”
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+padding: “20px 20px 110px”
+}
+}, /*#**PURE***/React.createElement(SB, {
+style: {
+marginBottom: 12
+}
+}, /*#**PURE***/React.createElement(“div”, null, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 11,
+color: “var(–t3)”,
+marginBottom: 4,
+textTransform: “uppercase”,
+letterSpacing: “0.08em”
+}
+}, “Lifting”), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 24,
+fontWeight: 800,
+letterSpacing: “-0.02em”
+}
+}, def.label)), /*#**PURE***/React.createElement(Btn, {
+v: “ghost”,
+onClick: onClose,
+style: {
+padding: “8px 14px”,
+fontSize: 12
+}
+}, “Close”)), /*#**PURE***/React.createElement(“div”, {
+style: {
+background: hexAlpha(LIFT_INTENSITY_COLOR[Math.ceil(4 - targetRir) || 1] || “var(–lift)”,0.12),
+border: “1px solid “+hexAlpha(LIFT_INTENSITY_COLOR[Math.ceil(4 - targetRir) || 1] || “var(–lift)”,0.25),
+borderRadius: “var(–r2)”,
+padding: “10px 14px”,
+marginBottom: 12
+}
+}, /*#**PURE***/React.createElement(Row, null, /*#**PURE***/React.createElement(Mono, {
+style: {
+fontSize: 20,
+fontWeight: 500,
+color: LIFT_INTENSITY_COLOR[Math.ceil(4 - targetRir) || 1] || “var(–lift)”
+}
+}, targetRir, “ RIR”), /*#**PURE***/React.createElement(“div”, null, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 13,
+fontWeight: 600
+}
+}, “Target this week”), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 11,
+color: “var(–t3)”
+}
+}, “Stop each set with “, targetRir, “ rep”, targetRir !== 1 ? “s” : “”, “ left in the tank”)))), /*#**PURE***/React.createElement(ScienceNote, {
+text: LIFT_SCIENCE[def.scienceKey]
+}), /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “flex”,
+gap: 6,
+overflowX: “auto”,
+marginBottom: 14,
+paddingBottom: 2,
+scrollbarWidth: “none”
+}
+}, exData.map((e, idx) => {
+const filled = e.sets.filter(s => s.reps).length;
+return /*#**PURE***/React.createElement(“button”, {
+key: idx,
+onClick: () => setAi(idx),
+style: {
+flexShrink: 0,
+padding: “7px 14px”,
+borderRadius: 20,
+background: ai === idx ? def.color : “var(–s2)”,
+color: ai === idx ? “#080809” : “var(–t2)”,
+border: “none”,
+fontSize: 12,
+fontWeight: 600,
+cursor: “pointer”
+}
+}, e.name.split(” “)[0], filled > 0 && /*#**PURE***/React.createElement(“span”, {
+style: {
+opacity: .6,
+fontSize: 10,
+marginLeft: 4
+}
+}, filled, “/”, e.sets.length));
+})), /*#**PURE***/React.createElement(Card, {
+style: {
+border: “1px solid “+hexAlpha(def.color,0.25),
+marginBottom: 10
+}
+}, /*#**PURE***/React.createElement(SB, {
+style: {
+marginBottom: 8
+}
+}, /*#**PURE***/React.createElement(“div”, null, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 16,
+fontWeight: 700
+}
+}, ex.name), ex.notes && /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 11,
+color: “var(–t3)”,
+marginTop: 2
+}
+}, ex.notes)), /*#**PURE***/React.createElement(Pill, {
+color: def.color
+}, ex.repRange)), LIFT_EX_NOTES[ex.name] && /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 11,
+color: “var(–t3)”,
+background: “var(–s3)”,
+borderRadius: 6,
+padding: “6px 10px”,
+marginBottom: 10,
+lineHeight: 1.6,
+display: “flex”,
+gap: 6,
+alignItems: “flex-start”
+}
+}, /*#**PURE***/React.createElement(“span”, {
+style: {
+flexShrink: 0,
+marginTop: 1
+}
+}, Ic.info()), /*#**PURE***/React.createElement(“span”, null, LIFT_EX_NOTES[ex.name])), /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “grid”,
+gridTemplateColumns: “24px 1fr 1fr 52px 24px”,
+gap: 6,
+marginBottom: 6
+}
+}, [”#”, “Reps”, “Weight”, “RIR”, “”].map((h, i) => /*#**PURE***/React.createElement(“div”, {
+key: i,
+style: {
+fontSize: 10,
+color: “var(–t3)”,
+textTransform: “uppercase”,
+letterSpacing: “0.06em”,
+textAlign: “center”
+}
+}, h))), ex.sets.map((set, si) => /*#**PURE***/React.createElement(“div”, {
+key: si,
+style: {
+display: “grid”,
+gridTemplateColumns: “24px 1fr 1fr 52px 24px”,
+gap: 6,
+marginBottom: 6,
+alignItems: “center”
+}
+}, /*#**PURE***/React.createElement(Mono, {
+style: {
+fontSize: 11,
+color: “var(–t3)”,
+textAlign: “center”
+}
+}, si + 1), /*#**PURE***/React.createElement(“input”, {
+type: “number”,
+inputMode: “numeric”,
+value: set.reps,
+onChange: e => upd(ai, si, “reps”, e.target.value),
+placeholder: “–”,
+style: {
+textAlign: “center”,
+padding: “8px 4px”
+}
+}), /*#**PURE***/React.createElement(“input”, {
+type: “number”,
+inputMode: “decimal”,
+value: set.weight,
+onChange: e => upd(ai, si, “weight”, e.target.value),
+placeholder: “–”,
+style: {
+textAlign: “center”,
+padding: “8px 4px”
+}
+}), /*#**PURE***/React.createElement(“input”, {
+type: “number”,
+inputMode: “numeric”,
+value: set.rir,
+onChange: e => upd(ai, si, “rir”, e.target.value),
+placeholder: targetRir,
+min: 0,
+max: 5,
+style: {
+textAlign: “center”,
+padding: “8px 4px”
+}
+}), /*#**PURE***/React.createElement(“button”, {
+onClick: () => rmSet(ai, si),
+style: {
+background: “none”,
+color: “var(–t3)”,
+display: “flex”,
+alignItems: “center”,
+justifyContent: “center”
+}
+}, Ic.trash()))), /*#**PURE***/React.createElement(Btn, {
+v: “ghost”,
+onClick: () => addSet(ai),
+style: {
+width: “100%”,
+padding: “8px”,
+fontSize: 12,
+marginTop: 4
+}
+}, Ic.plus(), “ Add Set”)), /*#**PURE***/React.createElement(Card, {
+style: {
+marginBottom: 14
+}
+}, /*#**PURE***/React.createElement(ST, {
+c: “Session Note”
+}), /*#**PURE***/React.createElement(“textarea”, {
+value: note,
+onChange: e => setNote(e.target.value),
+placeholder: “How did it feel? Any adjustments?”,
+style: {
+resize: “none”,
+height: 72
+}
+})), /*#**PURE***/React.createElement(Btn, {
+onClick: save,
+style: {
+width: “100%”,
+padding: 14,
+fontSize: 14
+}
+}, Ic.check(), “ Save Session”)));
+}
+
+// — RUN DETAIL —————————————————————
+function RunDetail(_ref1) {
+var _runLogs$weekKey;
+let item = _ref1.item,
+weekKey = _ref1.weekKey,
+vdot = _ref1.vdot,
+runLogs = _ref1.runLogs,
+onSave = _ref1.onSave,
+onClose = _ref1.onClose;
+const runDef = item.runDef,
+miles = item.miles;
+const paces = VDOT_PACES[vdot] || VDOT_PACES[46];
+const segs = runDef.getSegs(paces, miles);
+const existing = ((_runLogs$weekKey = runLogs[weekKey]) === null || _runLogs$weekKey === void 0 ? void 0 : _runLogs$weekKey[item.id]) || {};
+const tc = typeColor(runDef.type);
+const segTotal = Math.round(segs.reduce((s, seg) => s + (seg.miles || 0), 0) * 10) / 10;
+const _useState11 = useState(existing.feel || null),
+_useState12 = _slicedToArray(_useState11, 2),
+feel = _useState12[0],
+setFeel = _useState12[1];
+const _useState13 = useState(existing.note || “”),
+_useState14 = _slicedToArray(_useState13, 2),
+note = _useState14[0],
+setNote = _useState14[1];
+const _useState15 = useState(existing.actualPace || “”),
+_useState16 = _slicedToArray(_useState15, 2),
+ap = _useState16[0],
+setAp = _useState16[1];
+const _useState17 = useState(existing.distance || “”),
+_useState18 = _slicedToArray(_useState17, 2),
+dist = _useState18[0],
+setDist = _useState18[1];
+const save = () => onSave({
+feel,
+note,
+actualPace: ap,
+distance: dist,
+completed: true,
+date: todayStr()
+});
+const isKey = l => [“Piece”, “Blk”, “MP”, “Pickup”, “x”, “Tempo”, “Strides”].some(k => l.includes(k));
+return /*#**PURE***/React.createElement(“div”, {
+style: {
+position: “fixed”,
+inset: 0,
+background: “var(–bg)”,
+zIndex: 300,
+overflowY: “auto”
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+padding: “20px 20px 110px”
+}
+}, /*#**PURE***/React.createElement(SB, {
+style: {
+marginBottom: 12
+}
+}, /*#**PURE***/React.createElement(“div”, null, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 11,
+color: “var(–t3)”,
+marginBottom: 4,
+textTransform: “uppercase”,
+letterSpacing: “0.08em”
+}
+}, “Running . “, fmtFull(item.date)), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 22,
+fontWeight: 800,
+letterSpacing: “-0.02em”,
+lineHeight: 1.2
+}
+}, runDef.label)), /*#**PURE***/React.createElement(Btn, {
+v: “ghost”,
+onClick: onClose,
+style: {
+padding: “8px 14px”,
+fontSize: 12
+}
+}, “Close”)), /*#**PURE***/React.createElement(Row, {
+style: {
+marginBottom: 12
+}
+}, /*#**PURE***/React.createElement(Pill, {
+color: tc
+}, runDef.type), /*#**PURE***/React.createElement(Pill, {
+color: “var(–t3)”
+}, miles, “ mi”), /*#**PURE***/React.createElement(Pill, {
+color: “var(–t3)”
+}, “VDOT “, vdot)), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 13,
+color: “var(–t2)”,
+marginBottom: 12,
+fontStyle: “italic”,
+lineHeight: 1.6
+}
+}, runDef.desc), /*#**PURE***/React.createElement(ScienceNote, {
+text: runDef.scienceNote
+}), /*#**PURE***/React.createElement(Card, {
+style: {
+marginBottom: 12
+}
+}, /*#**PURE***/React.createElement(SB, {
+style: {
+marginBottom: 10
+}
+}, /*#**PURE***/React.createElement(ST, {
+c: “Workout Structure”
+}), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 10,
+color: “var(–t3)”
+}
+}, “Total: “, segTotal, “ mi”)), segs.map((seg, idx) => /*#**PURE***/React.createElement(“div”, {
+key: idx,
+style: {
+display: “flex”,
+gap: 12,
+paddingBottom: idx < segs.length - 1 ? 12 : 0,
+borderBottom: idx < segs.length - 1 ? “1px solid var(–b1)” : “none”,
+marginBottom: idx < segs.length - 1 ? 12 : 0
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+width: 3,
+borderRadius: 3,
+background: isKey(seg.label) ? tc : “var(–b2)”,
+flexShrink: 0,
+alignSelf: “stretch”
+}
+}), /*#**PURE***/React.createElement(“div”, {
+style: {
+flex: 1
+}
+}, /*#**PURE***/React.createElement(SB, null, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 13,
+fontWeight: 600
+}
+}, seg.label), /*#**PURE***/React.createElement(Mono, {
+style: {
+fontSize: 13,
+color: isKey(seg.label) ? tc : “var(–t3)”
+}
+}, seg.pace)), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 11,
+color: “var(–t3)”,
+marginTop: 2
+}
+}, seg.dist, “ . “, seg.feel))))), /*#**PURE***/React.createElement(Card, {
+style: {
+background: hexAlpha(tc,0.05),
+border: “1px solid “+hexAlpha(tc,0.18),
+marginBottom: 12
+}
+}, /*#**PURE***/React.createElement(ST, {
+c: `Paces -- VDOT ${vdot}`
+}), /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “grid”,
+gridTemplateColumns: “1fr 1fr 1fr”,
+gap: 10
+}
+}, [[“Easy”, paces.E, “var(–run)”], [“Marathon”, paces.M, “var(–accent)”], [“Threshold”, paces.T, “var(–warn)”]].map(_ref10 => {
+let _ref11 = _slicedToArray(_ref10, 3),
+l = _ref11[0],
+p = _ref11[1],
+c = _ref11[2];
+return /*#**PURE***/React.createElement(“div”, {
+key: l,
+style: {
+textAlign: “center”
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 10,
+color: “var(–t3)”,
+textTransform: “uppercase”,
+letterSpacing: “0.06em”,
+marginBottom: 4
+}
+}, l), /*#**PURE***/React.createElement(Mono, {
+style: {
+fontSize: 14,
+fontWeight: 500,
+color: c
+}
+}, p));
+}))), /*#**PURE***/React.createElement(Card, {
+style: {
+marginBottom: 12
+}
+}, /*#**PURE***/React.createElement(ST, {
+c: “Log This Run”
+}), /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “grid”,
+gridTemplateColumns: “1fr 1fr”,
+gap: 10,
+marginBottom: 14
+}
+}, /*#**PURE***/React.createElement(“div”, null, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 11,
+color: “var(–t3)”,
+marginBottom: 5
+}
+}, “Avg Pace (min/mi)”), /*#**PURE***/React.createElement(“input”, {
+value: ap,
+onChange: e => setAp(e.target.value),
+placeholder: “7:30”
+})), /*#**PURE***/React.createElement(“div”, null, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 11,
+color: “var(–t3)”,
+marginBottom: 5
+}
+}, “Distance (mi)”), /*#**PURE***/React.createElement(“input”, {
+type: “number”,
+inputMode: “decimal”,
+value: dist,
+onChange: e => setDist(e.target.value),
+placeholder: miles
+}))), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 11,
+color: “var(–t3)”,
+marginBottom: 8
+}
+}, “How did it feel?”), /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “flex”,
+gap: 6,
+flexWrap: “wrap”,
+marginBottom: 14
+}
+}, FEEL.map(f => /*#**PURE***/React.createElement(“button”, {
+key: f.v,
+onClick: () => setFeel(f.v),
+style: {
+padding: “6px 10px”,
+borderRadius: 20,
+background: feel === f.v ? tc : “var(–s3)”,
+color: feel === f.v ? “#080809” : “var(–t2)”,
+border: “none”,
+fontSize: 12,
+fontWeight: 600,
+cursor: “pointer”,
+fontFamily: “Syne,sans-serif”
+}
+}, f.e, “ “, f.label))), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 11,
+color: “var(–t3)”,
+marginBottom: 6
+}
+}, “Notes”), /*#**PURE***/React.createElement(“textarea”, {
+value: note,
+onChange: e => setNote(e.target.value),
+placeholder: “Conditions, how legs felt, pace adjustments…”,
+style: {
+resize: “none”,
+height: 72
+}
+})), /*#**PURE***/React.createElement(Btn, {
+onClick: save,
+style: {
+width: “100%”,
+padding: 14,
+fontSize: 14
+}
+}, Ic.check(), “ Log Run”)));
+}
+
+// — PAGE: WEEK —————————————————————
+function PageWeek(_ref12) {
+let state = _ref12.state,
+dispatch = _ref12.dispatch,
+setTab = _ref12.setTab;
+const vdot = state.vdot,
+viewWeek = state.viewWeek,
+liftLogs = state.liftLogs,
+runLogs = state.runLogs,
+vdotPromptDismissed = state.vdotPromptDismissed;
+const _useState19 = useState(null),
+_useState20 = _slicedToArray(_useState19, 2),
+modal = _useState20[0],
+setModal = _useState20[1];
+const tw = viewWeek;
+const key = wkKey(tw);
+const rwInfo = getRunningWeekInfo(tw);
+const blockNum = rwInfo.blockNum,
+weekInBlock = rwInfo.weekInBlock,
+targetMiles = rwInfo.targetMiles,
+isLastWeekOfBlock = rwInfo.isLastWeekOfBlock;
+const def = getWeekDef(blockNum, weekInBlock);
+const liftRir = LIFT_RIR_BY_WEEK[weekInBlock];
+const liftLabel = LIFT_INTENSITY_LABEL[weekInBlock];
+const liftColor = LIFT_INTENSITY_COLOR[weekInBlock];
+const schedule = useMemo(() => buildSchedule(tw), [tw]);
+const nw = nowWeek();
+const isCurrent = tw === nw;
+
+// Block boundary: show VDOT prompt if the previous week was the last of a block
+const prevBlockEndWeek = tw - 1;
+const showVdotPrompt = isCurrent && prevBlockEndWeek >= 1 && getRunningWeekInfo(prevBlockEndWeek).isLastWeekOfBlock && !vdotPromptDismissed.includes(prevBlockEndWeek);
+const isDone = item => {
+var _liftLogs$key, _runLogs$key;
+return item.type === “lift” ? !!((_liftLogs$key = liftLogs[key]) !== null && _liftLogs$key !== void 0 && (_liftLogs$key = _liftLogs$key[item.id]) !== null && _liftLogs$key !== void 0 && _liftLogs$key.completed) : !!((_runLogs$key = runLogs[key]) !== null && _runLogs$key !== void 0 && (_runLogs$key = _runLogs$key[item.id]) !== null && _runLogs$key !== void 0 && _runLogs$key.completed);
+};
+const doneCount = schedule.filter(isDone).length;
+const handleSaveLift = data => {
+dispatch({
+type: “SAVE_LIFT”,
+wk: key,
+session: modal.id,
+data
+});
+setModal(null);
+};
+const handleSaveRun = data => {
+dispatch({
+type: “SAVE_RUN”,
+wk: key,
+session: modal.id,
+data
+});
+setModal(null);
+};
+const miSum = Math.round((() => {
+const mi = allocateMiles(targetMiles, blockNum, weekInBlock);
+return mi.easy + mi.Q1 + mi.easy2 + mi.Q2;
+})() * 10) / 10;
+return /*#**PURE***/React.createElement(“div”, {
+style: {
+padding: “20px 20px 100px”
+}
+}, (modal === null || modal === void 0 ? void 0 : modal.type) === “lift” && /*#**PURE***/React.createElement(LiftLogger, {
+sessionKey: modal.liftKey,
+weekKey: key,
+liftLogs: liftLogs,
+targetRir: liftRir,
+onSave: handleSaveLift,
+onClose: () => setModal(null)
+}), (modal === null || modal === void 0 ? void 0 : modal.type) === “run” && /*#**PURE***/React.createElement(RunDetail, {
+item: modal,
+weekKey: key,
+vdot: vdot,
+runLogs: runLogs,
+onSave: handleSaveRun,
+onClose: () => setModal(null)
+}), /*#**PURE***/React.createElement(SB, {
+style: {
+marginBottom: 4
+}
+}, /*#**PURE***/React.createElement(“div”, null, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 11,
+color: “var(–t3)”,
+textTransform: “uppercase”,
+letterSpacing: “0.08em”
+}
+}, “Block “, blockNum, “/6 . Week “, weekInBlock, “/4”, isCurrent && /*#**PURE***/React.createElement(“span”, {
+style: {
+color: “var(–accent)”
+}
+}, “ . Current”)), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 26,
+fontWeight: 800,
+letterSpacing: “-0.03em”,
+marginTop: 2
+}
+}, fmtShort(weekStart(tw)), “ - “, fmtShort(weekEnd(tw)))), /*#**PURE***/React.createElement(“div”, {
+style: {
+textAlign: “right”
+}
+}, /*#**PURE***/React.createElement(Mono, {
+style: {
+fontSize: 22,
+fontWeight: 500,
+color: doneCount === schedule.length ? “var(–ok)” : “var(–accent)”
+}
+}, doneCount, /*#**PURE***/React.createElement(“span”, {
+style: {
+fontSize: 14,
+color: “var(–t3)”
+}
+}, “/”, schedule.length)), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 10,
+color: “var(–t3)”
+}
+}, “DONE”))), showVdotPrompt && /*#**PURE***/React.createElement(VdotPrompt, {
+vdot: vdot,
+blockEndWeek: prevBlockEndWeek,
+dismissed: false,
+onDismiss: () => dispatch({
+type: “DISMISS_VDOT_PROMPT”,
+blockEnd: prevBlockEndWeek
+}),
+onUpdate: v => dispatch({
+type: “VDOT”,
+v
+})
+}), /*#**PURE***/React.createElement(“button”, {
+onClick: () => setTab(“cycle”),
+style: {
+width: “100%”,
+background: “var(–s1)”,
+border: “1px solid var(–b1)”,
+borderRadius: “var(–r)”,
+padding: “12px 14px”,
+marginBottom: 12,
+textAlign: “left”,
+cursor: “pointer”
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “grid”,
+gridTemplateColumns: “1fr 1fr”,
+gap: 10,
+marginBottom: 8
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+background: hexAlpha(def.color,0.1),
+borderRadius: “var(–r2)”,
+padding: “8px 10px”
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 10,
+color: “var(–t3)”,
+textTransform: “uppercase”,
+letterSpacing: “0.06em”,
+marginBottom: 3
+}
+}, “Running”), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 13,
+fontWeight: 700,
+color: def.color
+}
+}, def.label), /*#**PURE***/React.createElement(Mono, {
+style: {
+fontSize: 12,
+color: def.color
+}
+}, targetMiles, “ mi . “, miSum, “ planned”)), /*#**PURE***/React.createElement(“div”, {
+style: {
+background: hexAlpha(liftColor,0.1),
+borderRadius: “var(–r2)”,
+padding: “8px 10px”
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 10,
+color: “var(–t3)”,
+textTransform: “uppercase”,
+letterSpacing: “0.06em”,
+marginBottom: 3
+}
+}, “Lifting”), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 13,
+fontWeight: 700,
+color: liftColor
+}
+}, liftLabel), /*#**PURE***/React.createElement(Mono, {
+style: {
+fontSize: 12,
+color: liftColor
+}
+}, “Target “, liftRir, “ RIR”))), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 11,
+color: “var(–t3)”
+}
+}, def.desc, “ “, /*#**PURE***/React.createElement(“span”, {
+style: {
+color: “var(–accent)”
+}
+}, “View cycle ->”))), /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “grid”,
+gridTemplateColumns: “repeat(3,1fr)”,
+gap: 8,
+marginBottom: 14
+}
+}, [[“VDOT”, vdot, “var(–accent)”], [“Miles”, targetMiles, “var(–run)”], [“Lifts”, 4, “var(–lift)”]].map(_ref13 => {
+let _ref14 = _slicedToArray(_ref13, 3),
+l = _ref14[0],
+v = _ref14[1],
+c = _ref14[2];
+return /*#**PURE***/React.createElement(“div”, {
+key: l,
+style: {
+background: “var(–s1)”,
+border: “1px solid var(–b1)”,
+borderRadius: “var(–r)”,
+padding: “10px”,
+textAlign: “center”
+}
+}, /*#**PURE***/React.createElement(Mono, {
+style: {
+fontSize: 20,
+fontWeight: 500,
+color: c,
+display: “block”
+}
+}, v), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 10,
+color: “var(–t3)”,
+textTransform: “uppercase”,
+letterSpacing: “0.08em”,
+marginTop: 2
+}
+}, l));
+})), /*#**PURE***/React.createElement(ST, {
+c: “Schedule”
+}), schedule.map((item, idx) => {
+var _LIFTS$item$liftKey, _item$runDef;
+const done = isDone(item);
+const color = item.type === “lift” ? (_LIFTS$item$liftKey = LIFTS[item.liftKey]) === null || _LIFTS$item$liftKey === void 0 ? void 0 : _LIFTS$item$liftKey.color : ((_item$runDef = item.runDef) === null || _item$runDef === void 0 ? void 0 : _item$runDef.color) || “var(–run)”;
+const isTdy = toYMD(item.date) === todayStr();
+return /*#**PURE***/React.createElement(“button”, {
+key: idx,
+onClick: () => setModal(item),
+style: {
+width: “100%”,
+background: done ? “#0b1510” : “var(–s1)”,
+border: `1px solid ${done ? "rgba(74,222,128,0.25)" : isTdy ? "rgba(214,255,75,0.40)" : "var(--b1)"}`,
+borderRadius: “var(–r)”,
+padding: “12px 14px”,
+marginBottom: 8,
+display: “flex”,
+alignItems: “center”,
+gap: 12,
+textAlign: “left”,
+cursor: “pointer”
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+width: 36,
+height: 36,
+borderRadius: 10,
+background: hexAlpha(color,0.15),
+display: “flex”,
+alignItems: “center”,
+justifyContent: “center”,
+color,
+flexShrink: 0
+}
+}, item.type === “run” ? Ic.run() : Ic.lift()), /*#**PURE***/React.createElement(“div”, {
+style: {
+flex: 1,
+minWidth: 0
+}
+}, /*#**PURE***/React.createElement(Row, {
+style: {
+gap: 6,
+marginBottom: 2
+}
+}, /*#**PURE***/React.createElement(“span”, {
+style: {
+fontSize: 11,
+color: isTdy ? “var(–accent)” : “var(–t3)”
+}
+}, item.day, “ “, fmtMD(item.date)), isTdy && /*#**PURE***/React.createElement(Pill, {
+color: “var(–accent)”,
+sm: true
+}, “Today”)), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 14,
+fontWeight: 700,
+whiteSpace: “nowrap”,
+overflow: “hidden”,
+textOverflow: “ellipsis”
+}
+}, item.label), item.type === “run” && /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 11,
+color: “var(–t3)”,
+marginTop: 1
+}
+}, item.miles, “ mi”), item.type === “lift” && /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 11,
+color: liftColor,
+marginTop: 1
+}
+}, liftLabel, “ . “, liftRir, “ RIR”)), /*#**PURE***/React.createElement(Row, {
+style: {
+gap: 6,
+flexShrink: 0
+}
+}, done && /*#**PURE***/React.createElement(“span”, {
+style: {
+color: “var(–ok)”
+}
+}, Ic.check()), /*#**PURE***/React.createElement(“span”, {
+style: {
+color: “var(–t3)”
+}
+}, Ic.right())));
+}), /*#**PURE***/React.createElement(SB, {
+style: {
+marginTop: 14
+}
+}, /*#**PURE***/React.createElement(Btn, {
+v: “ghost”,
+onClick: () => dispatch({
+type: “VIEW_WEEK”,
+w: Math.max(1, tw - 1)
+}),
+style: {
+fontSize: 12,
+padding: “9px 14px”
+}
+}, Ic.left(), “ Prev”), /*#**PURE***/React.createElement(“button”, {
+onClick: () => dispatch({
+type: “VIEW_WEEK”,
+w: nw
+}),
+style: {
+background: “none”,
+color: “var(–t3)”,
+fontSize: 11,
+fontFamily: “Syne,sans-serif”,
+cursor: “pointer”
+}
+}, isCurrent ? “Current week” : “-> Current week”), /*#**PURE***/React.createElement(Btn, {
+v: “ghost”,
+onClick: () => dispatch({
+type: “VIEW_WEEK”,
+w: tw + 1
+}),
+style: {
+fontSize: 12,
+padding: “9px 14px”
+}
+}, “Next “, Ic.right())));
+}
+
+// — PAGE: CYCLE –––––––––––––––––––––––––––––––
+function PageCycle(_ref15) {
+let state = _ref15.state,
+dispatch = _ref15.dispatch,
+setTab = _ref15.setTab;
+const vdot = state.vdot;
+const nw = nowWeek();
+const paces = VDOT_PACES[vdot] || VDOT_PACES[46];
+const currentRwInfo = getRunningWeekInfo(nw);
+
+// Determine which 4-week block we’re in within the 24-week super-cycle
+const posIn24 = (nw - 1) % 24;
+const currentBlockIdx = Math.floor(posIn24 / 4);
+const blockStartTw = nw - currentRwInfo.weekInBlock + 1; // first week of current block
+
+return /*#**PURE***/React.createElement(“div”, {
+style: {
+padding: “20px 20px 100px”
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 28,
+fontWeight: 800,
+letterSpacing: “-0.03em”,
+marginBottom: 4
+}
+}, “Cycle Plan”), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 13,
+color: “var(–t2)”,
+marginBottom: 18
+}
+}, “6-block, 24-week program . VDOT “, vdot), [0, 1, 2, 3].map(offset => {
+const tw = blockStartTw + offset;
+const rwi = getRunningWeekInfo(tw);
+const blockNum = rwi.blockNum,
+weekInBlock = rwi.weekInBlock,
+targetMiles = rwi.targetMiles;
+const wdef = getWeekDef(blockNum, weekInBlock);
+const liftRir = LIFT_RIR_BY_WEEK[weekInBlock];
+const liftLabel = LIFT_INTENSITY_LABEL[weekInBlock];
+const liftColor = LIFT_INTENSITY_COLOR[weekInBlock];
+const isActive = tw === nw;
+const q1d = RUN_DEFS[wdef.Q1type];
+const q2d = RUN_DEFS[wdef.Q2type];
+const mi = allocateMiles(targetMiles, blockNum, weekInBlock);
+const miSum = Math.round((mi.easy + mi.Q1 + mi.easy2 + mi.Q2) * 10) / 10;
+return /*#**PURE***/React.createElement(“button”, {
+key: offset,
+onClick: () => {
+dispatch({
+type: “VIEW_WEEK”,
+w: tw
+});
+setTab(“week”);
+},
+style: {
+width: “100%”,
+background: isActive ? hexAlpha(wdef.color,0.08) : “var(–s1)”,
+border: `1px solid ${isActive ? hexAlpha(wdef.color,0.3) : "var(--b1)"}`,
+borderRadius: “var(–r)”,
+padding: 14,
+marginBottom: 10,
+textAlign: “left”,
+cursor: “pointer”
+}
+}, /*#**PURE***/React.createElement(SB, {
+style: {
+marginBottom: 10
+}
+}, /*#**PURE***/React.createElement(Row, null, /*#**PURE***/React.createElement(“div”, {
+style: {
+width: 26,
+height: 26,
+borderRadius: 7,
+background: hexAlpha(wdef.color,0.2),
+display: “flex”,
+alignItems: “center”,
+justifyContent: “center”,
+flexShrink: 0
+}
+}, /*#**PURE***/React.createElement(Mono, {
+style: {
+fontSize: 12,
+fontWeight: 600,
+color: wdef.color
+}
+}, weekInBlock)), /*#**PURE***/React.createElement(“div”, null, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 14,
+fontWeight: 700
+}
+}, “Week “, weekInBlock, “ – “, wdef.label), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 11,
+color: “var(–t3)”
+}
+}, fmtShort(weekStart(tw)), “ - “, fmtShort(weekEnd(tw))))), /*#**PURE***/React.createElement(Row, {
+style: {
+gap: 6
+}
+}, isActive && /*#**PURE***/React.createElement(Pill, {
+color: wdef.color,
+sm: true
+}, “Active”))), /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “grid”,
+gridTemplateColumns: “1fr 1fr”,
+gap: 8,
+marginBottom: 8
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+background: hexAlpha(wdef.color,0.08),
+borderRadius: “var(–r2)”,
+padding: “8px 10px”
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 9,
+color: “var(–t3)”,
+textTransform: “uppercase”,
+letterSpacing: “0.06em”,
+marginBottom: 4
+}
+}, “Running”), /*#**PURE***/React.createElement(Mono, {
+style: {
+fontSize: 15,
+fontWeight: 500,
+color: wdef.color,
+display: “block”
+}
+}, targetMiles, “ mi”), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 11,
+color: typeColor(q1d === null || q1d === void 0 ? void 0 : q1d.type),
+marginTop: 2
+}
+}, q1d === null || q1d === void 0 ? void 0 : q1d.label), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 11,
+color: typeColor(q2d === null || q2d === void 0 ? void 0 : q2d.type)
+}
+}, q2d === null || q2d === void 0 ? void 0 : q2d.label)), /*#**PURE***/React.createElement(“div”, {
+style: {
+background: hexAlpha(liftColor,0.08),
+borderRadius: “var(–r2)”,
+padding: “8px 10px”
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 9,
+color: “var(–t3)”,
+textTransform: “uppercase”,
+letterSpacing: “0.06em”,
+marginBottom: 4
+}
+}, “Lifting”), /*#**PURE***/React.createElement(Mono, {
+style: {
+fontSize: 15,
+fontWeight: 500,
+color: liftColor,
+display: “block”
+}
+}, liftRir, “ RIR”), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 11,
+color: liftColor,
+marginTop: 2
+}
+}, liftLabel), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 11,
+color: “var(–t3)”
+}
+}, “All sessions”))), /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “grid”,
+gridTemplateColumns: “repeat(4,1fr)”,
+gap: 4
+}
+}, (() => {
+const allR = [{
+miles: mi.easy,
+color: “var(–run)”
+}, {
+miles: mi.Q1,
+color: typeColor(q1d === null || q1d === void 0 ? void 0 : q1d.type)
+}, {
+miles: mi.easy2,
+color: “var(–run)”
+}, {
+miles: mi.Q2,
+color: typeColor(q2d === null || q2d === void 0 ? void 0 : q2d.type)
+}];
+const maxM = Math.max(…allR.map(r => r.miles));
+const li = allR.findIndex(r => r.miles === maxM);
+// Sun gets the longest; Thu gets the larger Q that didn’t go to Sun
+const sunMi = allR[li].miles,
+sunColor = allR[li].color;
+const thuMi = li === 1 ? mi.Q2 : mi.Q1,
+thuColor = li === 1 ? typeColor(q2d === null || q2d === void 0 ? void 0 : q2d.type) : typeColor(q1d === null || q1d === void 0 ? void 0 : q1d.type);
+const tueMi = li === 0 ? mi.easy2 : mi.easy;
+const satMi = li === 2 ? mi.easy : mi.easy2;
+return [[“Tue”, tueMi, “var(–run)”], [“Thu”, thuMi, thuColor], [“Sat”, satMi, “var(–run)”], [“Sun”, sunMi, sunColor]];
+})().map(_ref16 => {
+let _ref17 = _slicedToArray(_ref16, 3),
+l = _ref17[0],
+v = _ref17[1],
+c = _ref17[2];
+return /*#**PURE***/React.createElement(“div”, {
+key: l,
+style: {
+background: “var(–s3)”,
+borderRadius: 6,
+padding: “5px 6px”,
+textAlign: “center”
+}
+}, /*#**PURE***/React.createElement(Mono, {
+style: {
+fontSize: 12,
+fontWeight: 500,
+color: c,
+display: “block”
+}
+}, v), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 9,
+color: “var(–t3)”,
+marginTop: 1
+}
+}, l));
+})), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 10,
+color: “var(–t3)”,
+marginTop: 6,
+textAlign: “right”
+}
+}, miSum, “ mi planned . tap to open week ->”));
+}), /*#**PURE***/React.createElement(“div”, {
+style: {
+marginTop: 8,
+marginBottom: 12
+}
+}, /*#**PURE***/React.createElement(ST, {
+c: “24-Week Program Overview”
+}), RUNNING_BLOCKS.map((blk, bi) => /*#**PURE***/React.createElement(“div”, {
+key: bi,
+style: {
+display: “flex”,
+alignItems: “center”,
+gap: 10,
+marginBottom: 8
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 11,
+color: “var(–t3)”,
+width: 50,
+flexShrink: 0
+}
+}, “Blk “, blk.block), /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “flex”,
+gap: 4,
+flex: 1
+}
+}, blk.weeks.map((mult, wi) => {
+const mi = Math.round(mult * BASE_MILES);
+const liftRir = LIFT_RIR_BY_WEEK[wi + 1];
+const liftC = LIFT_INTENSITY_COLOR[wi + 1];
+const tw = bi * 4 + wi + 1; // rough tw for color
+const rwi = getRunningWeekInfo(tw);
+const wdef = getWeekDef(bi + 1, wi + 1);
+const isThisWeek = bi === currentBlockIdx && wi === currentRwInfo.weekInBlock - 1;
+return /*#**PURE***/React.createElement(“div”, {
+key: wi,
+style: {
+flex: 1,
+background: isThisWeek ? hexAlpha(wdef.color,0.2) : “var(–s2)”,
+border: isThisWeek ? `1px solid ${wdef.color}` : “1px solid var(–b1)”,
+borderRadius: 6,
+padding: “5px 4px”,
+textAlign: “center”
+}
+}, /*#**PURE***/React.createElement(Mono, {
+style: {
+fontSize: 10,
+fontWeight: 500,
+color: wdef.color,
+display: “block”
+}
+}, mi), /*#**PURE***/React.createElement(“div”, {
+style: {
+width: 6,
+height: 6,
+borderRadius: “50%”,
+background: liftC,
+margin: “2px auto 0”
+}
+}));
+})))), /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “flex”,
+gap: 10,
+marginTop: 8
+}
+}, Object.entries(LIFT_INTENSITY_COLOR).map(_ref18 => {
+let _ref19 = _slicedToArray(_ref18, 2),
+w = _ref19[0],
+c = _ref19[1];
+return /*#**PURE***/React.createElement(Row, {
+key: w,
+style: {
+gap: 4
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+width: 8,
+height: 8,
+borderRadius: “50%”,
+background: c
+}
+}), /*#**PURE***/React.createElement(“span”, {
+style: {
+fontSize: 10,
+color: “var(–t3)”
+}
+}, LIFT_INTENSITY_LABEL[w]));
+}))), /*#**PURE***/React.createElement(Card, null, /*#**PURE***/React.createElement(ST, {
+c: `Paces -- VDOT ${vdot}`
+}), /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “grid”,
+gridTemplateColumns: “1fr 1fr”,
+gap: 8
+}
+}, [[“Easy”, paces.E, “var(–run)”, “Conversational”], [“Marathon”, paces.M, “var(–accent)”, “Race effort”], [“Threshold”, paces.T, “var(–warn)”, “Comfortably hard”], [“Interval /400”, paces.I400, “var(–err)”, “Hard repeats”]].map(_ref20 => {
+let _ref21 = _slicedToArray(_ref20, 4),
+l = _ref21[0],
+p = _ref21[1],
+c = _ref21[2],
+h = _ref21[3];
+return /*#**PURE***/React.createElement(“div”, {
+key: l,
+style: {
+background: “var(–s3)”,
+borderRadius: “var(–r2)”,
+padding: “10px 12px”
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 10,
+color: “var(–t3)”,
+textTransform: “uppercase”,
+letterSpacing: “0.06em”,
+marginBottom: 3
+}
+}, l), /*#**PURE***/React.createElement(Mono, {
+style: {
+fontSize: 15,
+fontWeight: 500,
+color: c
+}
+}, p), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 10,
+color: “var(–t3)”,
+marginTop: 2
+}
+}, h));
+}))), /*#**PURE***/React.createElement(Card, {
+style: {
+marginTop: 10,
+background: “#111208”,
+border: “1px solid rgba(214,255,75,0.20)”
+}
+}, /*#**PURE***/React.createElement(ST, {
+c: “Phase 1 Progress”
+}), /*#**PURE***/React.createElement(SB, {
+style: {
+marginBottom: 8
+}
+}, /*#**PURE***/React.createElement(“span”, {
+style: {
+fontSize: 13
+}
+}, “VDOT “, vdot, “ -> 55”), /*#**PURE***/React.createElement(Mono, {
+style: {
+fontSize: 12,
+color: “var(–accent)”
+}
+}, Math.round((vdot - 46) / (55 - 46) * 100), “%”)), /*#**PURE***/React.createElement(“div”, {
+style: {
+height: 5,
+background: “var(–s3)”,
+borderRadius: 4,
+overflow: “hidden”
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+height: “100%”,
+width: `${Math.max(2, (vdot - 46) / (55 - 46) * 100)}%`,
+background: “var(–accent)”,
+borderRadius: 4
+}
+})), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 11,
+color: “var(–t3)”,
+marginTop: 8
+}
+}, “VDOT prompted at end of each 4-week block. At VDOT 55 -> sign up for a race 12-16 weeks out.”)));
+}
+
+// — PAGE: HISTORY ————————————————————
+function PageHistory(_ref22) {
+let state = _ref22.state;
+const liftLogs = state.liftLogs,
+runLogs = state.runLogs;
+const _useState21 = useState(“runs”),
+_useState22 = _slicedToArray(_useState21, 2),
+tab = _useState22[0],
+setTab = _useState22[1];
+const runs = useMemo(() => {
+const arr = [];
+Object.entries(runLogs).forEach(_ref23 => {
+let _ref24 = _slicedToArray(_ref23, 2),
+wk = _ref24[0],
+sessions = _ref24[1];
+const tw = parseInt(wk.replace(“w”, “”));
+Object.entries(sessions).forEach(_ref25 => {
+let _ref26 = _slicedToArray(_ref25, 2),
+sid = _ref26[0],
+d = _ref26[1];
+if (!(d !== null && d !== void 0 && d.completed)) return;
+arr.push({
+tw,
+sid,
+…d,
+rd: RUN_DEFS[sid]
+});
+});
+});
+return arr.sort((a, b) => (b.date || “”).localeCompare(a.date || “”));
+}, [runLogs]);
+const lifts = useMemo(() => {
+const arr = [];
+Object.entries(liftLogs).forEach(_ref27 => {
+let _ref28 = _slicedToArray(_ref27, 2),
+wk = _ref28[0],
+sessions = _ref28[1];
+const tw = parseInt(wk.replace(“w”, “”));
+Object.entries(sessions).forEach(_ref29 => {
+let _ref30 = _slicedToArray(_ref29, 2),
+sid = _ref30[0],
+d = _ref30[1];
+if (!(d !== null && d !== void 0 && d.completed)) return;
+arr.push({
+tw,
+sid,
+…d,
+def: LIFTS[sid]
+});
+});
+});
+return arr.sort((a, b) => (b.date || “”).localeCompare(a.date || “”));
+}, [liftLogs]);
+const weeklyMi = useMemo(() => {
+const map = {};
+Object.entries(runLogs).forEach(_ref31 => {
+let _ref32 = _slicedToArray(_ref31, 2),
+wk = _ref32[0],
+sessions = _ref32[1];
+const tw = parseInt(wk.replace(“w”, “”));
+if (!map[tw]) map[tw] = 0;
+Object.values(sessions).forEach(d => {
+if (d !== null && d !== void 0 && d.completed && d.distance) map[tw] += parseFloat(d.distance) || 0;
+});
+});
+return Object.entries(map).map(_ref33 => {
+let _ref34 = _slicedToArray(_ref33, 2),
+w = _ref34[0],
+m = _ref34[1];
+return {
+w: parseInt(w),
+m: Math.round(m * 10) / 10
+};
+}).sort((a, b) => a.w - b.w).slice(-10);
+}, [runLogs]);
+const paceTrend = useMemo(() => {
+return […runs].reverse().filter(r => r.actualPace && r.actualPace.includes(”:”)).slice(0, 12).map(r => {
+const _r$actualPace$split$m = r.actualPace.split(”:”).map(Number),
+_r$actualPace$split$m2 = _slicedToArray(_r$actualPace$split$m, 2),
+min = _r$actualPace$split$m2[0],
+sec = _r$actualPace$split$m2[1];
+return {
+date: r.date.slice(5),
+pace: min + (sec || 0) / 60
+};
+});
+}, [runs]);
+const totalMi = runs.reduce((s, r) => s + (parseFloat(r.distance) || 0), 0);
+const BarChart = _ref35 => {
+let data = _ref35.data,
+color = _ref35.color;
+if (!data.length) return /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 13,
+color: “var(–t3)”,
+textAlign: “center”,
+padding: 16
+}
+}, “No data yet”);
+const max = Math.max(…data.map(d => d.value), 0.1);
+return /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “flex”,
+alignItems: “flex-end”,
+gap: 4,
+height: 80
+}
+}, data.map((d, i) => /*#**PURE***/React.createElement(“div”, {
+key: i,
+style: {
+flex: 1,
+display: “flex”,
+flexDirection: “column”,
+alignItems: “center”,
+gap: 3
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 8,
+color: “var(–t3)”
+}
+}, d.value), /*#**PURE***/React.createElement(“div”, {
+style: {
+width: “100%”,
+height: `${d.value / max * 60}px`,
+minHeight: 2,
+background: color,
+borderRadius: “3px 3px 0 0”,
+opacity: .85
+}
+}), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 8,
+color: “var(–t3)”,
+whiteSpace: “nowrap”
+}
+}, d.label))));
+};
+const LineChart = _ref36 => {
+var _data$, _data;
+let data = _ref36.data;
+if (data.length < 2) return /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 13,
+color: “var(–t3)”,
+textAlign: “center”,
+padding: 16
+}
+}, “Log more runs”);
+const W = 280,
+H = 60,
+min = Math.min(…data.map(d => d.pace)),
+max = Math.max(…data.map(d => d.pace)),
+range = max - min || 0.1;
+const pts = data.map((d, i) => ({
+x: i / (data.length - 1) * W,
+y: H - (d.pace - min) / range * (H - 12) - 6
+}));
+const path = pts.map((p, i) => `${i === 0 ? "M" : "L"}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(” “);
+return /*#**PURE***/React.createElement(“div”, null, /*#**PURE***/React.createElement(“svg”, {
+viewBox: `0 0 ${W} ${H}`,
+style: {
+width: “100%”,
+height: H
+}
+}, /*#**PURE***/React.createElement(“path”, {
+d: path,
+fill: “none”,
+stroke: “var(–run)”,
+strokeWidth: “2”,
+strokeLinecap: “round”,
+strokeLinejoin: “round”
+}), pts.map((p, i) => /*#**PURE***/React.createElement(“circle”, {
+key: i,
+cx: p.x,
+cy: p.y,
+r: “3”,
+fill: “var(–run)”
+}))), /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “flex”,
+justifyContent: “space-between”,
+fontSize: 9,
+color: “var(–t3)”,
+marginTop: 4
+}
+}, /*#**PURE***/React.createElement(“span”, null, (_data$ = data[0]) === null || _data$ === void 0 ? void 0 : _data$.date), /*#**PURE***/React.createElement(“span”, null, “faster – slower”), /*#**PURE***/React.createElement(“span”, null, (_data = data[data.length - 1]) === null || _data === void 0 ? void 0 : _data.date)));
+};
+return /*#**PURE***/React.createElement(“div”, {
+style: {
+padding: “20px 20px 100px”
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 28,
+fontWeight: 800,
+letterSpacing: “-0.03em”,
+marginBottom: 4
+}
+}, “History”), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 13,
+color: “var(–t2)”,
+marginBottom: 14
+}
+}, “Jun 8, 2026 – present”), /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “grid”,
+gridTemplateColumns: “repeat(3,1fr)”,
+gap: 8,
+marginBottom: 16
+}
+}, [[runs.length, “Runs”, “var(–run)”], [Math.round(totalMi * 10) / 10, “Miles”, “var(–accent)”], [lifts.length, “Sessions”, “var(–lift)”]].map(_ref37 => {
+let _ref38 = _slicedToArray(_ref37, 3),
+v = _ref38[0],
+l = _ref38[1],
+c = _ref38[2];
+return /*#**PURE***/React.createElement(“div”, {
+key: l,
+style: {
+background: “var(–s1)”,
+border: “1px solid var(–b1)”,
+borderRadius: “var(–r)”,
+padding: “12px 10px”,
+textAlign: “center”
+}
+}, /*#**PURE***/React.createElement(Mono, {
+style: {
+fontSize: 20,
+fontWeight: 500,
+color: c,
+display: “block”
+}
+}, v), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 10,
+color: “var(–t3)”,
+textTransform: “uppercase”,
+letterSpacing: “0.08em”,
+marginTop: 2
+}
+}, l));
+})), /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “flex”,
+gap: 6,
+marginBottom: 14
+}
+}, [“runs”, “lifts”, “charts”].map(t => /*#**PURE***/React.createElement(“button”, {
+key: t,
+onClick: () => setTab(t),
+style: {
+padding: “7px 16px”,
+borderRadius: 20,
+background: tab === t ? “var(–t1)” : “var(–s2)”,
+color: tab === t ? “var(–bg)” : “var(–t2)”,
+border: “none”,
+fontSize: 12,
+fontWeight: 700,
+cursor: “pointer”,
+fontFamily: “Syne,sans-serif”,
+textTransform: “capitalize”
+}
+}, t))), tab === “charts” && /*#**PURE***/React.createElement(React.Fragment, null, /*#**PURE***/React.createElement(Card, {
+style: {
+marginBottom: 12
+}
+}, /*#**PURE***/React.createElement(ST, {
+c: “Weekly Mileage Logged”
+}), /*#**PURE***/React.createElement(BarChart, {
+data: weeklyMi.map(w => ({
+label: `W${w.w}`,
+value: w.m
+})),
+color: “var(–run)”
+})), /*#**PURE***/React.createElement(Card, null, /*#**PURE***/React.createElement(ST, {
+c: “Avg Pace Trend”
+}), /*#**PURE***/React.createElement(LineChart, {
+data: paceTrend
+}), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 11,
+color: “var(–t3)”,
+marginTop: 8
+}
+}, “Lower = faster. Based on manually logged paces.”))), tab === “runs” && (runs.length === 0 ? /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 13,
+color: “var(–t3)”,
+textAlign: “center”,
+padding: 30
+}
+}, “No runs logged yet.”) : runs.slice(0, 10).map((r, i) => {
+var _r$rd, _r$rd2;
+const tc = typeColor((_r$rd = r.rd) === null || _r$rd === void 0 ? void 0 : _r$rd.type),
+feelObj = FEEL.find(f => f.v === r.feel);
+return /*#**PURE***/React.createElement(Card, {
+key: i,
+style: {
+marginBottom: 10
+}
+}, /*#**PURE***/React.createElement(SB, {
+style: {
+marginBottom: 6
+}
+}, /*#**PURE***/React.createElement(“div”, null, /*#**PURE***/React.createElement(Row, {
+style: {
+gap: 6,
+marginBottom: 4
+}
+}, r.rd && /*#**PURE***/React.createElement(Pill, {
+color: tc,
+sm: true
+}, r.rd.type), /*#**PURE***/React.createElement(“span”, {
+style: {
+fontSize: 11,
+color: “var(–t3)”
+}
+}, r.date)), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 14,
+fontWeight: 700
+}
+}, ((_r$rd2 = r.rd) === null || _r$rd2 === void 0 ? void 0 : _r$rd2.label) || r.sid)), /*#**PURE***/React.createElement(“div”, {
+style: {
+textAlign: “right”
+}
+}, r.actualPace && /*#**PURE***/React.createElement(Mono, {
+style: {
+fontSize: 14,
+fontWeight: 500,
+color: “var(–run)”
+}
+}, r.actualPace, “/mi”), r.distance && /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 11,
+color: “var(–t3)”
+}
+}, r.distance, “ mi”))), feelObj && /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 13,
+marginTop: 4
+}
+}, feelObj.e, “ “, feelObj.label), r.note && /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 11,
+color: “var(–t3)”,
+marginTop: 6,
+fontStyle: “italic”,
+lineHeight: 1.5
+}
+}, r.note));
+})), tab === “lifts” && (lifts.length === 0 ? /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 13,
+color: “var(–t3)”,
+textAlign: “center”,
+padding: 30
+}
+}, “No sessions logged yet.”) : lifts.slice(0, 8).map((r, i) => {
+var _r$def;
+const exLogged = Object.keys(r).filter(k => {
+var _r$k;
+return ![“sessionNote”, “completed”, “date”, “tw”, “sid”, “def”].includes(k) && ((_r$k = r[k]) === null || _r$k === void 0 ? void 0 : _r$k.sets);
+});
+return /*#**PURE***/React.createElement(Card, {
+key: i,
+style: {
+marginBottom: 10
+}
+}, /*#**PURE***/React.createElement(SB, {
+style: {
+marginBottom: 8
+}
+}, /*#**PURE***/React.createElement(“div”, null, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 11,
+color: “var(–t3)”
+}
+}, r.date), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 14,
+fontWeight: 700,
+marginTop: 2
+}
+}, ((_r$def = r.def) === null || _r$def === void 0 ? void 0 : _r$def.label) || r.sid)), r.def && /*#**PURE***/React.createElement(“div”, {
+style: {
+width: 10,
+height: 10,
+borderRadius: “50%”,
+background: r.def.color
+}
+})), exLogged.map(ex => {
+var _r$ex;
+const sets = ((_r$ex = r[ex]) === null || _r$ex === void 0 ? void 0 : _r$ex.sets) || [];
+const vol = sets.reduce((s, set) => s + (parseFloat(set.reps) || 0) * (parseFloat(set.weight) || 0), 0);
+const avgRir = sets.length ? sets.reduce((s, set) => s + (parseFloat(set.rir) || 3), 0) / sets.length : null;
+return /*#**PURE***/React.createElement(“div”, {
+key: ex,
+style: {
+display: “flex”,
+justifyContent: “space-between”,
+paddingBottom: 6,
+borderBottom: “1px solid var(–b1)”,
+marginBottom: 6
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 12
+}
+}, ex), /*#**PURE***/React.createElement(Row, {
+style: {
+gap: 10
+}
+}, vol > 0 && /*#**PURE***/React.createElement(Mono, {
+style: {
+fontSize: 11,
+color: “var(–t2)”
+}
+}, Math.round(vol).toLocaleString(), “ vol”), avgRir !== null && /*#**PURE***/React.createElement(Mono, {
+style: {
+fontSize: 11,
+color: avgRir <= 1.5 ? “var(–ok)” : “var(–t3)”
+}
+}, “RIR “, avgRir.toFixed(1))));
+}), r.sessionNote && /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 11,
+color: “var(–t3)”,
+fontStyle: “italic”,
+marginTop: 4
+}
+}, r.sessionNote));
+})));
+}
+
+// — PAGE: SETTINGS ———————————————————–
+function PageSettings(_ref39) {
+let state = _ref39.state,
+dispatch = _ref39.dispatch;
+const _useState23 = useState(state.vdot),
+_useState24 = _slicedToArray(_useState23, 2),
+vdotD = _useState24[0],
+setVdotD = _useState24[1];
+const flags = Object.entries(state.overloadFlags);
+return /*#**PURE***/React.createElement(“div”, {
+style: {
+padding: “20px 20px 100px”
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 28,
+fontWeight: 800,
+letterSpacing: “-0.03em”,
+marginBottom: 20
+}
+}, “Settings”), flags.length > 0 && /*#**PURE***/React.createElement(Card, {
+style: {
+background: “#141109”,
+border: “1px solid rgba(251,191,36,0.25)”,
+marginBottom: 12
+}
+}, /*#**PURE***/React.createElement(Row, {
+style: {
+marginBottom: 10
+}
+}, Ic.flag(), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 13,
+fontWeight: 700
+}
+}, “Overload Flags”)), flags.map(_ref40 => {
+let _ref41 = _slicedToArray(_ref40, 2),
+name = _ref41[0],
+flag = _ref41[1];
+return /*#**PURE***/React.createElement(“div”, {
+key: name,
+style: {
+marginBottom: 6
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 11,
+color: flag.kind === “go” ? “var(–ok)” : “var(–warn)”,
+fontWeight: 600
+}
+}, name), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 12,
+color: “var(–t2)”
+}
+}, flag.msg));
+})), /*#**PURE***/React.createElement(Card, {
+style: {
+marginBottom: 12
+}
+}, /*#**PURE***/React.createElement(ST, {
+c: “Running – VDOT”
+}), /*#**PURE***/React.createElement(Row, {
+style: {
+marginBottom: 10
+}
+}, /*#**PURE***/React.createElement(“input”, {
+type: “number”,
+value: vdotD,
+onChange: e => setVdotD(Number(e.target.value)),
+min: 46,
+max: 55,
+style: {
+width: 80
+}
+}), /*#**PURE***/React.createElement(Btn, {
+onClick: () => dispatch({
+type: “VDOT”,
+v: vdotD
+}),
+style: {
+padding: “9px 16px”,
+fontSize: 12
+}
+}, “Set VDOT”)), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 11,
+color: “var(–t3)”
+}
+}, “Prompted automatically at end of each 4-week block. Target: VDOT 55.”)), /*#**PURE***/React.createElement(Card, {
+style: {
+marginBottom: 12
+}
+}, /*#**PURE***/React.createElement(ST, {
+c: “Program Info”
+}), /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “grid”,
+gridTemplateColumns: “1fr 1fr”,
+gap: 10
+}
+}, /*#**PURE***/React.createElement(“div”, null, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 11,
+color: “var(–t3)”,
+marginBottom: 4
+}
+}, “Start Date”), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 13,
+fontWeight: 600
+}
+}, “Jun 8, 2026”)), /*#**PURE***/React.createElement(“div”, null, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 11,
+color: “var(–t3)”,
+marginBottom: 4
+}
+}, “Current Week”), /*#**PURE***/React.createElement(Mono, {
+style: {
+fontSize: 13,
+fontWeight: 500,
+color: “var(–accent)”
+}
+}, “Week “, nowWeek())), /*#**PURE***/React.createElement(“div”, null, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 11,
+color: “var(–t3)”,
+marginBottom: 4
+}
+}, “Program Length”), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 13,
+fontWeight: 600
+}
+}, “24 weeks / cycle”)), /*#**PURE***/React.createElement(“div”, null, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 11,
+color: “var(–t3)”,
+marginBottom: 4
+}
+}, “Lifting System”), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 13,
+fontWeight: 600
+}
+}, “Inverse periodization”)))), /*#**PURE***/React.createElement(Card, null, /*#**PURE***/React.createElement(ST, {
+c: “Strava Integration”
+}), /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 12,
+color: “var(–t2)”,
+marginBottom: 12,
+lineHeight: 1.8
+}
+}, “1. Go to “, /*#**PURE***/React.createElement(Mono, {
+style: {
+color: “var(–accent)”,
+fontSize: 11
+}
+}, “strava.com/settings/api”), /*#**PURE***/React.createElement(“br”, null), “2. Create app -> get Client ID + Secret”, /*#**PURE***/React.createElement(“br”, null), “3. Use this app’s URL as redirect URI”, /*#**PURE***/React.createElement(“br”, null), “4. Tap Connect (opens OAuth in browser)”), /*#**PURE***/React.createElement(Btn, {
+v: “ghost”,
+style: {
+fontSize: 12,
+color: “#fc4c02”,
+borderColor: “rgba(252,76,2,0.30)”
+}
+}, Ic.strava(), “ Connect Strava”)));
+}
+
+// — ROOT ———————————————————————
+function App() {
+const _useReducer = useReducer(reducer, null, initState),
+_useReducer2 = _slicedToArray(_useReducer, 2),
+state = _useReducer2[0],
+dispatch = _useReducer2[1];
+const _useState25 = useState(“week”),
+_useState26 = _slicedToArray(_useState25, 2),
+tab = _useState26[0],
+setTab = _useState26[1];
+const TABS = [{
+id: “week”,
+label: “Week”,
+Icon: Ic.week
+}, {
+id: “cycle”,
+label: “Cycle”,
+Icon: Ic.cycle
+}, {
+id: “history”,
+label: “History”,
+Icon: Ic.hist
+}, {
+id: “settings”,
+label: “Setup”,
+Icon: Ic.gear
+}];
+const nw = nowWeek();
+const rwInfo = getRunningWeekInfo(nw);
+const wdef = getWeekDef(rwInfo.blockNum, rwInfo.weekInBlock);
+const liftRir = LIFT_RIR_BY_WEEK[rwInfo.weekInBlock];
+const liftLabel = LIFT_INTENSITY_LABEL[rwInfo.weekInBlock];
+return /*#**PURE***/React.createElement(React.Fragment, null, /*#**PURE***/React.createElement(“style”, null, CSS), /*#**PURE***/React.createElement(“div”, {
+style: {
+minHeight: “100vh”,
+background: “var(–bg)”
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+padding: “18px 20px 0”,
+display: “flex”,
+alignItems: “center”,
+justifyContent: “space-between”
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontFamily: “var(–mono)”,
+fontSize: 13,
+fontWeight: 500
+}
+}, /*#**PURE***/React.createElement(“span”, {
+style: {
+color: “var(–accent)”
+}
+}, “apex”), /*#**PURE***/React.createElement(“span”, {
+style: {
+color: “var(–t3)”
+}
+}, “.training”)), /*#**PURE***/React.createElement(Row, {
+style: {
+gap: 6
+}
+}, /*#**PURE***/React.createElement(Pill, {
+color: wdef.color,
+sm: true
+}, rwInfo.targetMiles, “mi”), /*#**PURE***/React.createElement(Pill, {
+color: LIFT_INTENSITY_COLOR[rwInfo.weekInBlock],
+sm: true
+}, liftRir, “ RIR”), /*#**PURE***/React.createElement(Pill, {
+color: “var(–t3)”,
+sm: true
+}, “V”, state.vdot))), tab === “week” && /*#**PURE***/React.createElement(PageWeek, {
+state: state,
+dispatch: dispatch,
+setTab: setTab
+}), tab === “cycle” && /*#**PURE***/React.createElement(PageCycle, {
+state: state,
+dispatch: dispatch,
+setTab: setTab
+}), tab === “history” && /*#**PURE***/React.createElement(PageHistory, {
+state: state,
+dispatch: dispatch,
+setTab: setTab
+}), tab === “settings” && /*#**PURE***/React.createElement(PageSettingsWithStrava, {
+state: state,
+dispatch: dispatch,
+setTab: setTab
+}), /*#**PURE***/React.createElement(“nav”, {
+style: {
+position: “fixed”,
+bottom: 0,
+left: 0,
+right: 0,
+background: “rgba(8,8,9,0.95)”,
+backdropFilter: “blur(24px)”,
+borderTop: “1px solid var(–b1)”,
+display: “flex”,
+zIndex: 200
+}
+}, TABS.map(t => /*#**PURE***/React.createElement(“button”, {
+key: t.id,
+onClick: () => setTab(t.id),
+style: {
+flex: 1,
+padding: “12px 0 16px”,
+background: “none”,
+color: tab === t.id ? “var(–accent)” : “var(–t3)”,
+display: “flex”,
+flexDirection: “column”,
+alignItems: “center”,
+gap: 4,
+fontSize: 9,
+fontWeight: 700,
+letterSpacing: “0.1em”,
+textTransform: “uppercase”,
+transition: “color .15s”
+}
+}, /*#**PURE***/React.createElement(t.Icon, null), t.label)))));
+}
+
+// — STRAVA PANEL (injected into Settings) —————————––
+function StravaPanel(_ref42) {
+let dispatch = _ref42.dispatch;
+const _useState27 = useState(() => StravaAuth.getTokens()),
+_useState28 = _slicedToArray(_useState27, 2),
+tokens = _useState28[0],
+setTokens = _useState28[1];
+const _useState29 = useState(false),
+_useState30 = _slicedToArray(_useState29, 2),
+syncing = _useState30[0],
+setSyncing = _useState30[1];
+const _useState31 = useState(() => localStorage.getItem(“stravaLastSync”) || null),
+_useState32 = _slicedToArray(_useState31, 2),
+lastSync = _useState32[0],
+setLastSync = _useState32[1];
+const _useState33 = useState(””),
+_useState34 = _slicedToArray(_useState33, 2),
+syncMsg = _useState34[0],
+setSyncMsg = _useState34[1];
+const connected = !!(tokens !== null && tokens !== void 0 && tokens.accessToken);
+const athlete = tokens === null || tokens === void 0 ? void 0 : tokens.athlete;
+async function sync(runLogs) {
+setSyncing(true);
+setSyncMsg(“Fetching activities…”);
+// Fetch activities since program start
+const programStart = Math.floor(new Date(“2026-06-08”).getTime() / 1000);
+const activities = await StravaAuth.fetchActivities(programStart);
+const runs = activities.filter(a => a.type === “Run” || a.sport_type === “Run”);
+setSyncMsg(`Found ${runs.length} runs since June 8 2026`);
+
+```
+// For each run, match to a program week and session, auto-log if not already logged
+const MS_W = 7 * 24 * 3600 * 1000;
+const PROGRAM_START_D = new Date("2026-06-08");
+let imported = 0;
+runs.forEach(act => {
+  const actDate = new Date(act.start_date_local);
+  const tw = Math.max(1, Math.floor((actDate - PROGRAM_START_D) / MS_W) + 1);
+  const key = `w${tw}`;
+  const dow = actDate.getDay(); // 0=Sun,1=Mon,...
+  // Map day-of-week to session id
+  const sessionMap = {
+    0: "Q1orQ2sun",
+    2: "easy",
+    4: "Q1orQ2thu",
+    6: "easy2"
+  };
+  const distMi = Math.round(act.distance / 1609.34 * 10) / 10;
+  const paceSecPerMi = act.moving_time / (act.distance / 1609.34);
+  const paceMin = Math.floor(paceSecPerMi / 60);
+  const paceSec = Math.round(paceSecPerMi % 60);
+  const paceStr = `${paceMin}:${String(paceSec).padStart(2, "0")}`;
+  // Determine session: Sunday = long run (Q sun), Thursday = quality Thu
+  let sid = dow === 0 ? "Q1" : dow === 4 ? "Q2" : dow === 2 ? "easy" : dow === 6 ? "easy2" : null;
+  if (!sid) return;
+  // Save to runLogs if not already there
+  const existing = JSON.parse(localStorage.getItem("runLogs5") || "{}");
+  if (!existing[key]) existing[key] = {};
+  if (!existing[key][sid] || !existing[key][sid].stravaId) {
+    existing[key][sid] = {
+      completed: true,
+      date: actDate.toLocaleDateString("en-CA"),
+      distance: distMi,
+      actualPace: paceStr,
+      stravaId: act.id,
+      stravaName: act.name,
+      feel: null,
+      note: `Auto-imported from Strava: "${act.name}"`
+    };
+    imported++;
+  }
+  localStorage.setItem("runLogs5", JSON.stringify(existing));
+});
+const now = new Date().toLocaleString();
+localStorage.setItem("stravaLastSync", now);
+setLastSync(now);
+setSyncing(false);
+setSyncMsg(`Done -- ${imported} new runs imported. Reload to see them.`);
+```
+
+}
+return /*#**PURE***/React.createElement(“div”, {
+style: {
+background: “#141009”,
+border: “1px solid rgba(252,76,2,0.20)”,
+borderRadius: “var(–r)”,
+padding: 16,
+marginBottom: 12
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 10,
+fontWeight: 700,
+letterSpacing: “0.12em”,
+textTransform: “uppercase”,
+color: “var(–t3)”,
+marginBottom: 10
+}
+}, “Strava”), connected ? /*#**PURE***/React.createElement(React.Fragment, null, /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “flex”,
+alignItems: “center”,
+gap: 10,
+marginBottom: 12
+}
+}, /*#**PURE***/React.createElement(“div”, {
+style: {
+width: 36,
+height: 36,
+borderRadius: “50%”,
+background: “#fc4c02”,
+display: “flex”,
+alignItems: “center”,
+justifyContent: “center”
+}
+}, /*#**PURE***/React.createElement(“svg”, {
+width: 18,
+height: 18,
+viewBox: “0 0 24 24”,
+fill: “white”
+}, /*#**PURE***/React.createElement(“path”, {
+d: “M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169”
+}))), /*#**PURE***/React.createElement(“div”, null, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 13,
+fontWeight: 700,
+color: “var(–t1)”
+}
+}, “Connected”, athlete ? ` . ${athlete.firstname} ${athlete.lastname}` : “”), lastSync && /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 11,
+color: “var(–t3)”
+}
+}, “Last sync: “, lastSync))), syncMsg && /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 12,
+color: “var(–t2)”,
+marginBottom: 10,
+lineHeight: 1.6
+}
+}, syncMsg), /*#**PURE***/React.createElement(“div”, {
+style: {
+display: “flex”,
+gap: 8,
+flexWrap: “wrap”
+}
+}, /*#**PURE***/React.createElement(“button”, {
+onClick: () => sync(),
+disabled: syncing,
+style: {
+display: “inline-flex”,
+alignItems: “center”,
+gap: 6,
+padding: “9px 16px”,
+borderRadius: “var(–r2)”,
+fontSize: 12,
+fontWeight: 600,
+background: “#fc4c02”,
+color: “#fff”,
+border: “none”,
+cursor: syncing ? “default” : “pointer”,
+opacity: syncing ? 0.6 : 1,
+fontFamily: “Syne,sans-serif”
+}
+}, syncing ? “Syncing…” : “Sync Runs”), /*#**PURE***/React.createElement(“button”, {
+onClick: () => {
+StravaAuth.clearTokens();
+setTokens(null);
+setSyncMsg(””);
+},
+style: {
+display: “inline-flex”,
+alignItems: “center”,
+gap: 6,
+padding: “9px 16px”,
+borderRadius: “var(–r2)”,
+fontSize: 12,
+fontWeight: 600,
+background: “transparent”,
+color: “var(–t2)”,
+border: “1px solid var(–b1)”,
+cursor: “pointer”,
+fontFamily: “Syne,sans-serif”
+}
+}, “Disconnect”))) : /*#**PURE***/React.createElement(React.Fragment, null, /*#**PURE***/React.createElement(“div”, {
+style: {
+fontSize: 12,
+color: “var(–t2)”,
+marginBottom: 12,
+lineHeight: 1.7
+}
+}, “Connect Strava to auto-import completed runs. Distance, pace, and date are matched to your program weeks automatically.”), /*#**PURE***/React.createElement(“button”, {
+onClick: () => StravaAuth.startOAuth(),
+style: {
+display: “inline-flex”,
+alignItems: “center”,
+gap: 8,
+padding: “10px 18px”,
+borderRadius: “var(–r2)”,
+fontSize: 13,
+fontWeight: 600,
+background: “#fc4c02”,
+color: “#fff”,
+border: “none”,
+cursor: “pointer”,
+fontFamily: “Syne,sans-serif”
+}
+}, /*#**PURE***/React.createElement(“svg”, {
+width: 18,
+height: 18,
+viewBox: “0 0 24 24”,
+fill: “white”
+}, /*#**PURE***/React.createElement(“path”, {
+d: “M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169”
+})), “Connect Strava”)));
+}
+
+// — PATCH Settings to include StravaPanel —————————––
+const _OrigPageSettings = PageSettings;
+function PageSettingsWithStrava(_ref43) {
+let state = _ref43.state,
+dispatch = _ref43.dispatch;
+return /*#**PURE***/React.createElement(“div”, null, /*#**PURE***/React.createElement(_OrigPageSettings, {
+state: state,
+dispatch: dispatch
+}), /*#**PURE***/React.createElement(“div”, {
+style: {
+padding: “0 20px”
+}
+}, /*#**PURE***/React.createElement(StravaPanel, {
+dispatch: dispatch
+})));
+}
+
+// — MOUNT —————————————————————
+ReactDOM.createRoot(document.getElementById(“root”)).render(React.createElement(App));
+
+try{ReactDOM.createRoot(document.getElementById(‘root’)).render(React.createElement(App));}catch(e){document.getElementById(‘root’).innerHTML=’<div style="padding:30px;font-family:monospace;color:#f87171;background:#080809"><b>Error</b><br><br>’+(e&&e.message||String(e))+’</div>’;}
