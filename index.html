@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="apex"/>
 <meta name="theme-color" content="#080809"/>
-<title>apex&#xB7;training</title>
+<title>apex training</title>
 <link rel="manifest" href="manifest.json"/>
 </head>
 <body style="margin:0;padding:0;background:#080809;">
@@ -78,6 +78,16 @@ if (code) { await StravaAuth.handleCallback(code); window.location.replace(STRAV
 <script>
 var useState=React.useState,useReducer=React.useReducer,useMemo=React.useMemo;
 
+function hexAlpha(hex, alpha) {
+var map = {
+‘#38bdf8’:‘56,189,248’,’#fbbf24’:‘251,191,36’,’#e2ff5d’:‘226,255,93’,
+‘#fb923c’:‘251,146,60’,’#a78bfa’:‘167,139,250’,’#f472b6’:‘244,114,182’,
+‘#60a5fa’:‘96,165,250’,’#f87171’:‘248,113,113’,’#4ade80’:‘74,222,128’,
+‘#d6ff4b’:‘214,255,75’,’#fc4c02’:‘252,76,2’
+};
+return ‘rgba(’+(map[hex]||‘128,128,128’)+’,’+alpha+’)’;
+}
+
 function StravaPanel() {
 var _s1=React.useState(function(){return StravaAuth.getTokens();}),tokens=_s1[0],setTokens=_s1[1];
 var _s2=React.useState(false),syncing=_s2[0],setSyncing=_s2[1];
@@ -140,34 +150,23 @@ React.createElement(“div”,{style:{padding:“0 20px 20px”}},React.createEl
 </script>
 <script>
 try{
-
-function hexAlpha(hex, alpha) {
-var map = {
-‘#38bdf8’: ‘56,189,248’, ‘#fbbf24’: ‘251,191,36’, ‘#e2ff5d’: ‘226,255,93’,
-‘#fb923c’: ‘251,146,60’, ‘#a78bfa’: ‘167,139,250’, ‘#f472b6’: ‘244,114,182’,
-‘#60a5fa’: ‘96,165,250’, ‘#f87171’: ‘248,113,113’, ‘#4ade80’: ‘74,222,128’,
-‘#d6ff4b’: ‘214,255,75’, ‘#fc4c02’: ‘252,76,2’
-};
-var rgb = map[hex] || ‘128,128,128’;
-return ‘rgba(’ + rgb + ‘,’ + alpha + ‘)’;
-}
 function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
-function _nonIterableRest() { throw new TypeError(“Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.”); }
-function _unsupportedIterableToArray(r, a) { if (r) { if (“string” == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return “Object” === t && r.constructor && (t = r.constructor.name), “Map” === t || “Set” === t ? Array.from(r) : “Arguments” === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
 function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
-function _iterableToArrayLimit(r, l) { var t = null == r ? null : “undefined” != typeof Symbol && r[Symbol.iterator] || r[”@@iterator”]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t.return && (u = t.return(), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 const _React = React,
-useState = _React.useState,
-useReducer = _React.useReducer,
-useMemo = _React.useMemo,
-useEffect = _React.useEffect;
+  useState = _React.useState,
+  useReducer = _React.useReducer,
+  useMemo = _React.useMemo,
+  useEffect = _React.useEffect;
 
-// ─── PROGRAM CONFIG ───────────────────────────────────────────────────────────
+// — PROGRAM CONFIG ———————————————————–
 const PROGRAM_START = new Date(“2026-06-08”); // Monday June 8 2026
 const BASE_MILES = 50; // 1.0x
 
-// ─── 6-BLOCK RUNNING CYCLE ───────────────────────────────────────────────────
+// — 6-BLOCK RUNNING CYCLE —————————————————
 // Each block = 4 weeks. Multipliers x 50mi = target miles.
 // After block 6 it repeats from block 1 until target VDOT is reached.
 // Week 4 of each block always has the LOWEST mileage -> hardest lifting week.
@@ -222,7 +221,7 @@ isLastWeekOfBlock: weekInBlock === 3
 };
 }
 
-// ─── LIFTING INTENSITY ALIGNMENT ─────────────────────────────────────────────
+// — LIFTING INTENSITY ALIGNMENT ———————————————
 // Week 4 (lowest run mileage) = hardest lifting (0 RIR target)
 // Week 3 = 1 RIR, Week 2 = 2 RIR, Week 1 = 3 RIR
 // This creates concurrent periodization: when running is hardest, lifting backs off
@@ -245,7 +244,7 @@ const LIFT_INTENSITY_COLOR = {
 4: “#f87171”
 };
 
-// ─── RUNNING WEEK TYPES (by week-in-block) ───────────────────────────────────
+// — RUNNING WEEK TYPES (by week-in-block) ———————————–
 // Week 4 always lowest miles -> easy running focus
 const WEEK_IN_BLOCK_DEFS = {
 // Block 1
@@ -271,11 +270,11 @@ color: “#38bdf8”,
 desc: “Back to easy. Strides on 2 days.”
 },
 “1-4”: {
-label: “Threshold”,
-Q1type: “long_late_pickup”,
-Q2type: “T_broken”,
-color: “#fbbf24”,
-desc: “1 long run with late pickup + 1 broken T workout.”
+label: “Threshold+”,
+Q1type: “T_long_broken”,
+Q2type: “T_track”,
+color: “#fb923c”,
+desc: “2 T workouts – 1 long broken + 1 track with shorter intervals.”
 },
 // Block 2
 “2-1”: {
@@ -428,7 +427,7 @@ const key = `${blockNum}-${weekInBlock}`;
 return WEEK_IN_BLOCK_DEFS[key] || WEEK_IN_BLOCK_DEFS[“1-1”];
 }
 
-// ─── VDOT PACES ───────────────────────────────────────────────────────────────
+// — VDOT PACES —————————————————————
 const VDOT_PACES = {
 46: {
 E: “8:31-9:34”,
@@ -502,7 +501,7 @@ R400: “1:21”
 }
 };
 
-// ─── RUN SESSION DEFINITIONS ──────────────────────────────────────────────────
+// — RUN SESSION DEFINITIONS –––––––––––––––––––––––––
 const RUN_DEFS = {
 easy: {
 label: “Easy Run”,
@@ -694,8 +693,8 @@ T_track: {
 label: “Track Threshold”,
 type: “T”,
 color: “#fbbf24”,
-desc: “5x 1-mile repeats at threshold pace with 90-second recovery jogs.”,
-scienceNote: “Track T workouts leverage precise distance for consistent pacing and execution. 1-mile repeats at T pace are long enough to create meaningful lactate stress but short enough to recover between reps – allowing 5 miles of threshold work with uniform quality. Daniels recommends track T sessions later in training blocks when athletes are better conditioned to manage the precision required. The track surface also reduces mechanical variability, making split-to-split data more useful for VDOT assessment.”,
+desc: “Track workout with shorter T intervals – 400m, 800m, or 1600m repeats at threshold pace.”,
+scienceNote: “Track T workouts use shorter repeats than road threshold runs, letting you accumulate quality volume with better mechanical precision. 400m repeats stress the upper threshold zone and build leg turnover; 800m hits the sweet spot for lactate accumulation and clearance; 1600m builds sustained threshold capacity. Pick the distance based on feel – use 1600s early in a cycle, progress to 800s and 400s as fitness sharpens. The track removes pacing guesswork and makes split data directly comparable week to week.”,
 getSegs: p => [{
 label: “Warm-up”,
 pace: p.E,
@@ -703,17 +702,23 @@ dist: “2 mi”,
 miles: 2,
 feel: “Easy”
 }, {
-label: “5x 1mi @ T”,
+label: “Option A: 12x 400m”,
 pace: p.T,
-dist: “5 mi (1 mi each)”,
-miles: 5,
-feel: “Comfortably hard, even splits”
+dist: “~3 mi total (90s jog recovery)”,
+miles: 3,
+feel: “T pace – comfortably hard, even splits”
 }, {
-label: “Recovery jogs”,
-pace: p.E,
-dist: “~0.8 mi (90s ea)”,
-miles: 0.8,
-feel: “Recovery”
+label: “Option B: 6x 800m”,
+pace: p.T,
+dist: “~3 mi total (90s jog recovery)”,
+miles: 3,
+feel: “T pace – comfortably hard, even splits”
+}, {
+label: “Option C: 4x 1600m”,
+pace: p.T,
+dist: “~4 mi total (90s jog recovery)”,
+miles: 4,
+feel: “T pace – comfortably hard, even splits”
 }, {
 label: “Cool-down”,
 pace: p.E,
@@ -721,7 +726,7 @@ dist: “1.5 mi”,
 miles: 1.5,
 feel: “Easy”
 }],
-getTotalMiles: () => 2 + 5 + 0.8 + 1.5 // 9.3
+getTotalMiles: () => 2 + 3 + 1.5 // ~6.5 (conservative midpoint)
 },
 M_long: {
 label: “Long MP Run”,
@@ -797,14 +802,14 @@ getTotalMiles: () => 1.5 + 4 + 0.5 + 4 + 1.5 // 11.5
 }
 };
 
-// ─── MILEAGE HELPERS ──────────────────────────────────────────────────────────
+// — MILEAGE HELPERS –––––––––––––––––––––––––––––
 // All run miles are whole positive integers. Long run capped at 18 total miles.
 function wholeMi(n) {
 let min = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
 return Math.max(min, Math.round(n));
 }
 
-// ─── MILEAGE ALLOCATION ───────────────────────────────────────────────────────
+// — MILEAGE ALLOCATION —————————————————––
 function allocateMiles(totalMi, blockNum, weekInBlock) {
 const def = getWeekDef(blockNum, weekInBlock);
 const q1def = RUN_DEFS[def.Q1type];
@@ -839,7 +844,7 @@ Q2: q2Fixed
 };
 }
 
-// ─── DATE HELPERS ─────────────────────────────────────────────────────────────
+// — DATE HELPERS ———————————————————––
 const MS_W = 7 * 24 * 3600 * 1000;
 function addDays(d, n) {
 const r = new Date(d);
@@ -885,7 +890,7 @@ function todayStr() {
 return toYMD(new Date());
 }
 
-// ─── BUILD WEEK SCHEDULE ──────────────────────────────────────────────────────
+// — BUILD WEEK SCHEDULE ——————————————————
 function buildSchedule(tw) {
 const rwInfo = getRunningWeekInfo(tw);
 const blockNum = rwInfo.blockNum,
@@ -987,7 +992,7 @@ runDef: sunRun.def
 }];
 }
 
-// ─── LIFT SESSIONS ─────────────────────────────────────────────────────────────
+// — LIFT SESSIONS ———————————————————––
 const LIFT_SCIENCE = {
 pull: “Pull day targets lats and elbow flexors. Pull-ups are first when you’re freshest – highest neuromuscular demand, best carryover to lat width. Rows follow for mid-back thickness (rhomboids, middle traps) that pull-ups underload. Curls last when biceps are pre-fatigued from compound pulling, increasing relative stimulus without adding absolute load. On Week 4 (peak intensity), target 0 RIR – you have the most recovery capacity available because running is at its lightest.”,
 push: “Push day hits upper chest and deltoids first when you’re strongest. Incline movements are prioritized over flat pressing for hybrid athletes – the angle reduces shoulder impingement risk from cumulative overhead running stress and builds the upper chest/anterior deltoid. Lateral raises placed after pressing pre-exhaust the medial deltoid for the overhead extension sets. The lifting intensity ramps across the 4-week block inverse to running load.”,
@@ -1160,34 +1165,34 @@ notes: “Myorep second set”
 const FEEL = [{
 v: 1,
 label: “Terrible”,
-e: “\u1f480”
+e: “x_x”
 }, {
 v: 2,
 label: “Very Hard”,
-e: “\u1f624”
+e: “>:(”
 }, {
 v: 3,
 label: “Hard”,
-e: “\u1f613”
+e: “:/”
 }, {
 v: 4,
 label: “OK”,
-e: “\u1f610”
+e: “:-|”
 }, {
 v: 5,
 label: “Good”,
-e: “\u1f60a”
+e: “:)”
 }, {
 v: 6,
 label: “Strong”,
-e: “\u1f4aa”
+e: “:muscle:”
 }, {
 v: 7,
 label: “Easy”,
-e: “\u1f7e2”
+e: “(o)”
 }];
 
-// ─── STORAGE ──────────────────────────────────────────────────────────────────
+// — STORAGE ——————————————————————
 const LS = {
 g: function (k) {
 let d = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
@@ -1239,7 +1244,7 @@ msg: “Volume dropped vs last session – check fatigue”
 return null;
 }
 
-// ─── REDUCER ──────────────────────────────────────────────────────────────────
+// — REDUCER ——————————————————————
 function reducer(s, a) {
 switch (a.type) {
 case “VDOT”:
@@ -1310,10 +1315,10 @@ return s;
 }
 }
 
-// ─── CSS ──────────────────────────────────────────────────────────────────────
+// — CSS –––––––––––––––––––––––––––––––––––
 const CSS = `@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap'); *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;} :root{ --bg:#080809;--s1:#0f0f11;--s2:#161618;--s3:#1e1e21; --b1:#2c2c31;--b2:#38383f; --t1:#f0f0f2;--t2:#9898a3;--t3:#5a5a64; --accent:#d6ff4b;--acc2:#a8cc38; --run:#38bdf8;--lift:#fb923c;--warn:#fbbf24;--ok:#4ade80;--err:#f87171;--purple:#a78bfa; --r:14px;--r2:10px;--mono:'IBM Plex Mono',monospace; } body{background:var(--bg);color:var(--t1);font-family:'Syne',sans-serif;-webkit-font-smoothing:antialiased;font-size:14px;} input,textarea{font-family:'Syne',sans-serif;font-size:13px;color:var(--t1);background:var(--s3);border:1px solid var(--b1);border-radius:var(--r2);padding:9px 12px;outline:none;width:100%;transition:border-color .15s;} input:focus,textarea:focus{border-color:var(--accent);} button{font-family:'Syne',sans-serif;cursor:pointer;border:none;outline:none;} ::-webkit-scrollbar{width:3px;height:3px;} ::-webkit-scrollbar-thumb{background:var(--b1);border-radius:4px;}`;
 
-// ─── ICONS ────────────────────────────────────────────────────────────────────
+// — ICONS ––––––––––––––––––––––––––––––––––
 const Ic = {
 week: () => /*#**PURE***/React.createElement(“svg”, {
 width: 20,
@@ -1535,7 +1540,7 @@ d: “M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.
 }))
 };
 
-// ─── PRIMITIVES ───────────────────────────────────────────────────────────────
+// — PRIMITIVES —————————————————————
 const Card = _ref => {
 let children = _ref.children,
 style = _ref.style,
@@ -1674,7 +1679,7 @@ M: “var(–accent)”
 }[t] || “var(–t2)”;
 }
 
-// ─── SCIENCE NOTE ─────────────────────────────────────────────────────────────
+// — SCIENCE NOTE ———————————————————––
 function ScienceNote(_ref8) {
 let text = _ref8.text;
 const _useState = useState(false),
@@ -1701,7 +1706,7 @@ fontWeight: 600,
 width: “100%”,
 cursor: “pointer”
 }
-}, Ic.flask(), “ The Science “, open ? “\u25b2” : “\u25bc”), open && /*#**PURE***/React.createElement(“div”, {
+}, Ic.flask(), “ The Science “, open ? “^” : “v”), open && /*#**PURE***/React.createElement(“div”, {
 style: {
 background: “#111208”,
 border: “1px solid rgba(214,255,75,0.15)”,
@@ -1718,7 +1723,7 @@ lineHeight: 1.8
 }, text)));
 }
 
-// ─── VDOT PROMPT BANNER ───────────────────────────────────────────────────────
+// — VDOT PROMPT BANNER —————————————————––
 function VdotPrompt(_ref9) {
 let vdot = _ref9.vdot,
 blockEndWeek = _ref9.blockEndWeek,
@@ -1811,7 +1816,7 @@ padding: “8px 14px”
 }, “Cancel”)));
 }
 
-// ─── LIFT LOGGER ──────────────────────────────────────────────────────────────
+// — LIFT LOGGER –––––––––––––––––––––––––––––––
 function LiftLogger(_ref0) {
 var _liftLogs$weekKey;
 let sessionKey = _ref0.sessionKey,
@@ -1922,7 +1927,7 @@ fontSize: 12
 }, “Close”)), /*#**PURE***/React.createElement(“div”, {
 style: {
 background: hexAlpha(LIFT_INTENSITY_COLOR[Math.ceil(4 - targetRir) || 1] || “var(–lift)”,0.12),
-border: “1px solid “ + hexAlpha(LIFT_INTENSITY_COLOR[Math.ceil(4 - targetRir) || 1] || “var(–lift)”,0.25),
+border: “1px solid “+hexAlpha(LIFT_INTENSITY_COLOR[Math.ceil(4 - targetRir) || 1] || “var(–lift)”,0.25),
 borderRadius: “var(–r2)”,
 padding: “10px 14px”,
 marginBottom: 12
@@ -1979,7 +1984,7 @@ marginLeft: 4
 }, filled, “/”, e.sets.length));
 })), /*#**PURE***/React.createElement(Card, {
 style: {
-border: “1px solid “ + hexAlpha(def.color,0.25),
+border: “1px solid “+hexAlpha(def.color,0.25),
 marginBottom: 10
 }
 }, /*#**PURE***/React.createElement(SB, {
@@ -2122,7 +2127,7 @@ fontSize: 14
 }, Ic.check(), “ Save Session”)));
 }
 
-// ─── RUN DETAIL ───────────────────────────────────────────────────────────────
+// — RUN DETAIL —————————————————————
 function RunDetail(_ref1) {
 var _runLogs$weekKey;
 let item = _ref1.item,
@@ -2276,7 +2281,7 @@ marginTop: 2
 }, seg.dist, “ \xB7 “, seg.feel))))), /*#**PURE***/React.createElement(Card, {
 style: {
 background: hexAlpha(tc,0.05),
-border: “1px solid “ + hexAlpha(tc,0.18),
+border: “1px solid “+hexAlpha(tc,0.18),
 marginBottom: 12
 }
 }, /*#**PURE***/React.createElement(ST, {
@@ -2398,7 +2403,7 @@ fontSize: 14
 }, Ic.check(), “ Log Run”)));
 }
 
-// ─── PAGE: WEEK ───────────────────────────────────────────────────────────────
+// — PAGE: WEEK —————————————————————
 function PageWeek(_ref12) {
 let state = _ref12.state,
 dispatch = _ref12.dispatch,
@@ -2770,7 +2775,7 @@ padding: “9px 14px”
 }, “Next “, Ic.right())));
 }
 
-// ─── PAGE: CYCLE ──────────────────────────────────────────────────────────────
+// — PAGE: CYCLE –––––––––––––––––––––––––––––––
 function PageCycle(_ref15) {
 let state = _ref15.state,
 dispatch = _ref15.dispatch,
@@ -3162,7 +3167,7 @@ marginTop: 8
 }, “VDOT prompted at end of each 4-week block. At VDOT 55 \u2192 sign up for a race 12\u201316 weeks out.”)));
 }
 
-// ─── PAGE: HISTORY ────────────────────────────────────────────────────────────
+// — PAGE: HISTORY ————————————————————
 function PageHistory(_ref22) {
 let state = _ref22.state;
 const liftLogs = state.liftLogs,
@@ -3598,7 +3603,7 @@ marginTop: 4
 })));
 }
 
-// ─── PAGE: SETTINGS ───────────────────────────────────────────────────────────
+// — PAGE: SETTINGS ———————————————————–
 function PageSettings(_ref39) {
 let state = _ref39.state,
 dispatch = _ref39.dispatch;
@@ -3768,7 +3773,7 @@ borderColor: “rgba(252,76,2,0.30)”
 }, Ic.strava(), “ Connect Strava”)));
 }
 
-// ─── ROOT ─────────────────────────────────────────────────────────────────────
+// — ROOT ———————————————————————
 function App() {
 const _useReducer = useReducer(reducer, null, initState),
 _useReducer2 = _slicedToArray(_useReducer, 2),
@@ -3888,7 +3893,7 @@ transition: “color .15s”
 }, /*#**PURE***/React.createElement(t.Icon, null), t.label)))));
 }
 
-// ─── STRAVA PANEL (injected into Settings) ───────────────────────────────
+// — STRAVA PANEL (injected into Settings) —————————––
 function StravaPanel(_ref42) {
 let dispatch = _ref42.dispatch;
 const _useState27 = useState(() => StravaAuth.getTokens()),
@@ -4016,7 +4021,7 @@ fontSize: 13,
 fontWeight: 700,
 color: “var(–t1)”
 }
-}, “Connected”, athlete ? ` · ${athlete.firstname} ${athlete.lastname}` : “”), lastSync && /*#**PURE***/React.createElement(“div”, {
+}, “Connected”, athlete ? ` . ${athlete.firstname} ${athlete.lastname}` : “”), lastSync && /*#**PURE***/React.createElement(“div”, {
 style: {
 fontSize: 11,
 color: “var(–t3)”
@@ -4105,7 +4110,7 @@ d: “M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.5
 })), “Connect Strava”)));
 }
 
-// ─── PATCH Settings to include StravaPanel ───────────────────────────────
+// — PATCH Settings to include StravaPanel —————————––
 const _OrigPageSettings = PageSettings;
 function PageSettingsWithStrava(_ref43) {
 let state = _ref43.state,
@@ -4122,7 +4127,7 @@ dispatch: dispatch
 })));
 }
 
-// ─── MOUNT ───────────────────────────────────────────────────────────────
+// — MOUNT —————————————————————
 ReactDOM.createRoot(document.getElementById(“root”)).render(React.createElement(App));
 
 ReactDOM.createRoot(document.getElementById(“root”)).render(React.createElement(App));
