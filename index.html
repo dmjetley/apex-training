@@ -58,11 +58,20 @@ window.StravaAuth = {
   fetchActivities: function(after) {
     return StravaAuth.refreshIfNeeded().then(function(token) {
       if (!token) return [];
-      return fetch("https://www.strava.com/api/v3/athlete/activities?per_page=50&after="+after,
-        {headers: {Authorization: "Bearer "+token}})
-        .then(function(r) { return r.json(); })
-        .then(function(d) { return Array.isArray(d) ? d : []; })
-        .catch(function() { return []; });
+      // Paginate through all results (50 per page)
+      function fetchPage(page, acc) {
+        var url = "https://www.strava.com/api/v3/athlete/activities?per_page=50&after="+after+"&page="+page;
+        return fetch(url, {headers: {Authorization: "Bearer "+token}})
+          .then(function(r) { return r.json(); })
+          .then(function(d) {
+            if (!Array.isArray(d) || d.length === 0) return acc;
+            var all = acc.concat(d);
+            if (d.length < 50) return all; // last page
+            return fetchPage(page + 1, all);
+          })
+          .catch(function() { return acc; });
+      }
+      return fetchPage(1, []);
     });
   },
   startOAuth: function() {
