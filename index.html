@@ -8,7 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="apex"/>
 <meta name="theme-color" content="#080809"/>
-<title>apex·training</title>
+<title>apex&#xB7;training</title>
 <link rel="manifest" href="manifest.json"/>
 </head>
 <body style="margin:0;padding:0;background:#080809;">
@@ -21,6 +21,9 @@ window.onerror=function(msg,src,line){
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script>
+if(typeof React==='undefined'){document.getElementById('root').innerHTML='<div style="padding:30px;color:#f87171;font-family:monospace">Failed to load React. Check internet.</div>';}
+</script>
 <script>
 const STRAVA_CLIENT_ID     = "247028";
 const STRAVA_CLIENT_SECRET = "00a9a7ca70c325a2e3a4f06de6a023f1a6fa1491";
@@ -76,43 +79,36 @@ if (code) { await StravaAuth.handleCallback(code); window.location.replace(STRAV
 var useState=React.useState,useReducer=React.useReducer,useMemo=React.useMemo;
 
 function StravaPanel() {
-var _s1 = React.useState(function(){ return StravaAuth.getTokens(); });
-var tokens = _s1[0], setTokens = _s1[1];
-var _s2 = React.useState(false);
-var syncing = _s2[0], setSyncing = _s2[1];
-var _s3 = React.useState(function(){ return localStorage.getItem(“stravaLastSync”)||null; });
-var lastSync = _s3[0], setLastSync = _s3[1];
-var _s4 = React.useState(””);
-var syncMsg = _s4[0], setSyncMsg = _s4[1];
-var connected = !!(tokens && tokens.accessToken);
-var athlete = tokens && tokens.athlete;
-var orange = “#fc4c02”;
-function sync() {
-setSyncing(true); setSyncMsg(“Fetching activities…”);
-var after = Math.floor(new Date(“2026-06-08”).getTime()/1000);
-StravaAuth.fetchActivities(after).then(function(activities) {
-var runs = activities.filter(function(a){ return a.type===“Run”||a.sport_type===“Run”; });
-var PROG = new Date(“2026-06-08”), MSW = 7*24*3600*1000, imported=0;
+var _s1=React.useState(function(){return StravaAuth.getTokens();}),tokens=_s1[0],setTokens=_s1[1];
+var _s2=React.useState(false),syncing=_s2[0],setSyncing=_s2[1];
+var _s3=React.useState(function(){return localStorage.getItem(“stravaLastSync”)||null;}),lastSync=_s3[0],setLastSync=_s3[1];
+var _s4=React.useState(””),syncMsg=_s4[0],setSyncMsg=_s4[1];
+var connected=!!(tokens&&tokens.accessToken),athlete=tokens&&tokens.athlete,orange=”#fc4c02”;
+function sync(){
+setSyncing(true);setSyncMsg(“Fetching activities…”);
+var after=Math.floor(new Date(“2026-06-08”).getTime()/1000);
+StravaAuth.fetchActivities(after).then(function(activities){
+var runs=activities.filter(function(a){return a.type===“Run”||a.sport_type===“Run”;});
+var PROG=new Date(“2026-06-08”),MSW=7*24*3600*1000,imported=0;
 runs.forEach(function(act){
-var d=new Date(act.start_date_local);
-var tw=Math.max(1,Math.floor((d-PROG)/MSW)+1);
-var key=“w”+tw, dow=d.getDay();
+var d=new Date(act.start_date_local),tw=Math.max(1,Math.floor((d-PROG)/MSW)+1);
+var key=“w”+tw,dow=d.getDay();
 var sid=dow===0?“Q1”:dow===4?“Q2”:dow===2?“easy”:dow===6?“easy2”:null;
-if(!sid) return;
+if(!sid)return;
 var dist=Math.round((act.distance/1609.34)*10)/10;
 var spm=act.moving_time/(act.distance/1609.34);
 var pace=Math.floor(spm/60)+”:”+String(Math.round(spm%60)).padStart(2,“0”);
 var ex=JSON.parse(localStorage.getItem(“runLogs5”)||”{}”);
-if(!ex[key]) ex[key]={};
+if(!ex[key])ex[key]={};
 if(!ex[key][sid]||!ex[key][sid].stravaId){
-ex[key][sid]={completed:true,date:d.toLocaleDateString(“en-CA”),distance:dist,actualPace:pace,stravaId:act.id,feel:null,note:‘Strava: “’+act.name+’”’};
+ex[key][sid]={completed:true,date:d.toLocaleDateString(“en-CA”),distance:dist,actualPace:pace,stravaId:act.id,feel:null,note:“Strava: “+act.name};
 imported++;
 }
 localStorage.setItem(“runLogs5”,JSON.stringify(ex));
 });
 var now=new Date().toLocaleString();
 localStorage.setItem(“stravaLastSync”,now);
-setLastSync(now); setSyncing(false);
+setLastSync(now);setSyncing(false);
 setSyncMsg(“Done - “+imported+” new runs imported. Reload to see them.”);
 });
 }
@@ -120,37 +116,30 @@ var sIcon=React.createElement(“svg”,{width:18,height:18,viewBox:“0 0 24 24
 return React.createElement(“div”,{style:{background:“rgba(252,76,2,0.06)”,border:“1px solid rgba(252,76,2,0.2)”,borderRadius:14,padding:16,marginBottom:12}},
 React.createElement(“div”,{style:{fontSize:10,fontWeight:700,letterSpacing:“0.12em”,textTransform:“uppercase”,color:”#5a5a64”,marginBottom:10}},“Strava”),
 connected
-? React.createElement(“div”,null,
+?React.createElement(“div”,null,
 React.createElement(“div”,{style:{display:“flex”,alignItems:“center”,gap:10,marginBottom:12}},
 React.createElement(“div”,{style:{width:36,height:36,borderRadius:“50%”,background:orange,display:“flex”,alignItems:“center”,justifyContent:“center”}},sIcon),
 React.createElement(“div”,null,
 React.createElement(“div”,{style:{fontSize:13,fontWeight:700,color:”#f0f0f2”}},“Connected”+(athlete?” - “+athlete.firstname:””)),
-lastSync?React.createElement(“div”,{style:{fontSize:11,color:”#5a5a64”}},“Last sync: “+lastSync):null
-)
-),
+lastSync?React.createElement(“div”,{style:{fontSize:11,color:”#5a5a64”}},“Last sync: “+lastSync):null)),
 syncMsg?React.createElement(“div”,{style:{fontSize:12,color:”#9898a3”,marginBottom:10,lineHeight:1.6}},syncMsg):null,
 React.createElement(“div”,{style:{display:“flex”,gap:8}},
 React.createElement(“button”,{onClick:sync,disabled:syncing,style:{padding:“9px 16px”,borderRadius:10,fontSize:12,fontWeight:600,background:orange,color:”#fff”,border:“none”,cursor:“pointer”,fontFamily:“Syne,sans-serif”}},syncing?“Syncing…”:“Sync Runs”),
-React.createElement(“button”,{onClick:function(){StravaAuth.clearTokens();setTokens(null);},style:{padding:“9px 16px”,borderRadius:10,fontSize:12,fontWeight:600,background:“transparent”,color:”#9898a3”,border:“1px solid #2c2c31”,cursor:“pointer”,fontFamily:“Syne,sans-serif”}},“Disconnect”)
-)
-)
-: React.createElement(“div”,null,
+React.createElement(“button”,{onClick:function(){StravaAuth.clearTokens();setTokens(null);},style:{padding:“9px 16px”,borderRadius:10,fontSize:12,fontWeight:600,background:“transparent”,color:”#9898a3”,border:“1px solid #2c2c31”,cursor:“pointer”,fontFamily:“Syne,sans-serif”}},“Disconnect”)))
+:React.createElement(“div”,null,
 React.createElement(“div”,{style:{fontSize:12,color:”#9898a3”,marginBottom:12,lineHeight:1.7}},“Connect Strava to auto-import your runs.”),
-React.createElement(“button”,{onClick:function(){StravaAuth.startOAuth();},style:{display:“inline-flex”,alignItems:“center”,gap:8,padding:“10px 18px”,borderRadius:10,fontSize:13,fontWeight:600,background:orange,color:”#fff”,border:“none”,cursor:“pointer”,fontFamily:“Syne,sans-serif”}},sIcon,” Connect Strava”)
-)
-);
+React.createElement(“button”,{onClick:function(){StravaAuth.startOAuth();},style:{display:“inline-flex”,alignItems:“center”,gap:8,padding:“10px 18px”,borderRadius:10,fontSize:13,fontWeight:600,background:orange,color:”#fff”,border:“none”,cursor:“pointer”,fontFamily:“Syne,sans-serif”}},sIcon,” Connect Strava”)));
 }
-var _OrigPS = PageSettings;
-function PageSettingsWithStrava(props) {
+var _OrigPS=PageSettings;
+function PageSettingsWithStrava(props){
 return React.createElement(“div”,null,
 React.createElement(_OrigPS,props),
-React.createElement(“div”,{style:{padding:“0 20px 20px”}},React.createElement(StravaPanel,null))
-);
+React.createElement(“div”,{style:{padding:“0 20px 20px”}},React.createElement(StravaPanel,null)));
 }
 
 </script>
 <script>
-try {
+try{
 
 function hexAlpha(hex, alpha) {
 var map = {
@@ -179,9 +168,9 @@ const PROGRAM_START = new Date(“2026-06-08”); // Monday June 8 2026
 const BASE_MILES = 50; // 1.0x
 
 // ─── 6-BLOCK RUNNING CYCLE ───────────────────────────────────────────────────
-// Each block = 4 weeks. Multipliers × 50mi = target miles.
+// Each block = 4 weeks. Multipliers x 50mi = target miles.
 // After block 6 it repeats from block 1 until target VDOT is reached.
-// Week 4 of each block always has the LOWEST mileage → hardest lifting week.
+// Week 4 of each block always has the LOWEST mileage -> hardest lifting week.
 const RUNNING_BLOCKS = [{
 block: 1,
 weeks: [0.8, 0.9, 0.8, 0.9]
@@ -257,7 +246,7 @@ const LIFT_INTENSITY_COLOR = {
 };
 
 // ─── RUNNING WEEK TYPES (by week-in-block) ───────────────────────────────────
-// Week 4 always lowest miles → easy running focus
+// Week 4 always lowest miles -> easy running focus
 const WEEK_IN_BLOCK_DEFS = {
 // Block 1
 “1-1”: {
@@ -294,7 +283,7 @@ label: “Marathon”,
 Q1type: “M_long”,
 Q2type: “M_broken”,
 color: “#e2ff5d”,
-desc: “2 M workouts — long sustained MP + broken MP.”
+desc: “2 M workouts – long sustained MP + broken MP.”
 },
 “2-2”: {
 label: “Base”,
@@ -308,7 +297,7 @@ label: “Marathon”,
 Q1type: “M_long”,
 Q2type: “M_broken”,
 color: “#e2ff5d”,
-desc: “2 M workouts — long sustained MP + broken MP.”
+desc: “2 M workouts – long sustained MP + broken MP.”
 },
 “2-4”: {
 label: “Threshold”,
@@ -323,7 +312,7 @@ label: “Marathon”,
 Q1type: “M_long”,
 Q2type: “M_broken”,
 color: “#e2ff5d”,
-desc: “2 M workouts — long sustained MP + broken MP.”
+desc: “2 M workouts – long sustained MP + broken MP.”
 },
 “3-2”: {
 label: “Base”,
@@ -337,7 +326,7 @@ label: “Threshold”,
 Q1type: “T_long_broken”,
 Q2type: “T_track”,
 color: “#fbbf24”,
-desc: “2 T workouts — long broken + track intervals.”
+desc: “2 T workouts – long broken + track intervals.”
 },
 “3-4”: {
 label: “Base”,
@@ -352,14 +341,14 @@ label: “Marathon”,
 Q1type: “M_long”,
 Q2type: “M_broken”,
 color: “#e2ff5d”,
-desc: “2 M workouts — long sustained MP + broken MP.”
+desc: “2 M workouts – long sustained MP + broken MP.”
 },
 “4-2”: {
 label: “Threshold”,
 Q1type: “T_long_broken”,
 Q2type: “T_track”,
 color: “#fbbf24”,
-desc: “2 T workouts — long broken + track intervals.”
+desc: “2 T workouts – long broken + track intervals.”
 },
 “4-3”: {
 label: “Base”,
@@ -373,7 +362,7 @@ label: “Base”,
 Q1type: “easy_strides”,
 Q2type: “easy_long”,
 color: “#38bdf8”,
-desc: “Lowest mileage week. Full recovery — peak lifting.”
+desc: “Lowest mileage week. Full recovery – peak lifting.”
 },
 // Block 5
 “5-1”: {
@@ -381,21 +370,21 @@ label: “Marathon”,
 Q1type: “M_long”,
 Q2type: “M_broken”,
 color: “#e2ff5d”,
-desc: “2 M workouts — long sustained MP + broken MP.”
+desc: “2 M workouts – long sustained MP + broken MP.”
 },
 “5-2”: {
 label: “Threshold”,
 Q1type: “T_long_broken”,
 Q2type: “T_track”,
 color: “#fbbf24”,
-desc: “2 T workouts — long broken + track intervals.”
+desc: “2 T workouts – long broken + track intervals.”
 },
 “5-3”: {
 label: “Marathon”,
 Q1type: “M_long”,
 Q2type: “M_broken”,
 color: “#e2ff5d”,
-desc: “2 M workouts — peak mileage week.”
+desc: “2 M workouts – peak mileage week.”
 },
 “5-4”: {
 label: “Base”,
@@ -410,14 +399,14 @@ label: “Marathon”,
 Q1type: “M_long”,
 Q2type: “M_broken”,
 color: “#e2ff5d”,
-desc: “2 M workouts — long sustained MP + broken MP.”
+desc: “2 M workouts – long sustained MP + broken MP.”
 },
 “6-2”: {
 label: “Threshold”,
 Q1type: “T_long_broken”,
 Q2type: “T_track”,
 color: “#fbbf24”,
-desc: “2 T workouts — long broken + track intervals.”
+desc: “2 T workouts – long broken + track intervals.”
 },
 “6-3”: {
 label: “Threshold”,
@@ -442,70 +431,70 @@ return WEEK_IN_BLOCK_DEFS[key] || WEEK_IN_BLOCK_DEFS[“1-1”];
 // ─── VDOT PACES ───────────────────────────────────────────────────────────────
 const VDOT_PACES = {
 46: {
-E: “8:31–9:34”,
+E: “8:31-9:34”,
 M: “7:49”,
 T: “7:17”,
 I400: “4:12”,
 R400: “1:32”
 },
 47: {
-E: “8:22–9:25”,
+E: “8:22-9:25”,
 M: “7:40”,
 T: “7:09”,
 I400: “4:07”,
 R400: “1:30”
 },
 48: {
-E: “8:13–9:15”,
+E: “8:13-9:15”,
 M: “7:32”,
 T: “7:02”,
 I400: “4:03”,
 R400: “1:29”
 },
 49: {
-E: “8:05–9:06”,
+E: “8:05-9:06”,
 M: “7:24”,
 T: “6:56”,
 I400: “3:59”,
 R400: “1:28”
 },
 50: {
-E: “7:57–8:49”,
+E: “7:57-8:49”,
 M: “7:17”,
 T: “6:50”,
 I400: “3:55”,
 R400: “1:27”
 },
 51: {
-E: “7:49–8:49”,
+E: “7:49-8:49”,
 M: “7:09”,
 T: “6:44”,
 I400: “3:51”,
 R400: “1:26”
 },
 52: {
-E: “7:42–8:41”,
+E: “7:42-8:41”,
 M: “7:02”,
 T: “6:38”,
 I400: “3:48”,
 R400: “1:25”
 },
 53: {
-E: “7:35–8:33”,
+E: “7:35-8:33”,
 M: “6:56”,
 T: “6:32”,
 I400: “3:44”,
 R400: “1:24”
 },
 54: {
-E: “7:28–8:26”,
+E: “7:28-8:26”,
 M: “6:49”,
 T: “6:26”,
 I400: “3:41”,
 R400: “1:22”
 },
 55: {
-E: “7:21–8:18”,
+E: “7:21-8:18”,
 M: “6:43”,
 T: “6:20”,
 I400: “3:37”,
@@ -520,13 +509,13 @@ label: “Easy Run”,
 type: “E”,
 color: “#38bdf8”,
 desc: “Conversational pace throughout. Full sentences the whole way.”,
-scienceNote: “80–85% of your weekly mileage should be easy. Easy running builds capillary density, mitochondrial volume, and fat oxidation capacity — the aerobic engine that quality workouts then tax. Daniels’ research shows that physiological stress from easy running is additive: more easy miles = larger aerobic engine, even without pace increases. On a concurrent training program, easy running also enhances recovery from lifting by increasing blood flow and nutrient delivery to muscles.”,
+scienceNote: “80-85% of your weekly mileage should be easy. Easy running builds capillary density, mitochondrial volume, and fat oxidation capacity – the aerobic engine that quality workouts then tax. Daniels’ research shows that physiological stress from easy running is additive: more easy miles = larger aerobic engine, even without pace increases. On a concurrent training program, easy running also enhances recovery from lifting by increasing blood flow and nutrient delivery to muscles.”,
 getSegs: (p, mi) => [{
 label: “Full Run”,
 pace: p.E,
 dist: `${mi} mi`,
 miles: mi,
-feel: “Conversational — full sentences”
+feel: “Conversational – full sentences”
 }],
 getTotalMiles: mi => mi
 },
@@ -534,8 +523,8 @@ easy2: {
 label: “Easy Run”,
 type: “E”,
 color: “#38bdf8”,
-desc: “Recovery easy run. Genuinely easy — err slower rather than faster.”,
-scienceNote: “Saturday’s easy run follows Thursday’s quality session. Running easy the day after harder effort accelerates recovery through increased blood flow while adding aerobic volume. On a hybrid program, Saturday is deliberately easy running + lighter lifting — the concurrent stress is manageable precisely because both stimuli are sub-maximal on this day.”,
+desc: “Recovery easy run. Genuinely easy – err slower rather than faster.”,
+scienceNote: “Saturday’s easy run follows Thursday’s quality session. Running easy the day after harder effort accelerates recovery through increased blood flow while adding aerobic volume. On a hybrid program, Saturday is deliberately easy running + lighter lifting – the concurrent stress is manageable precisely because both stimuli are sub-maximal on this day.”,
 getSegs: (p, mi) => [{
 label: “Full Run”,
 pace: p.E,
@@ -549,7 +538,7 @@ easy_strides: {
 label: “Easy + Strides”,
 type: “E”,
 color: “#38bdf8”,
-desc: “Easy run with 6× 20-second strides at mile effort. Full 90s walk recovery between each.”,
+desc: “Easy run with 6x 20-second strides at mile effort. Full 90s walk recovery between each.”,
 scienceNote: “Strides are one of the highest ROI tools in distance running. A 20-second acceleration to mile pace costs almost no aerobic or metabolic fatigue but recruits fast-twitch motor units, improves running economy through neuromuscular adaptation, and maintains speed even during base-building. Crucially, on peak lifting weeks (Week 4) strides give your running a neuromuscular stimulus without the aerobic load that would compromise lifting recovery. High reward, minimal concurrent interference.”,
 getSegs: (p, mi) => {
 const totalMi = Math.max(2, Math.round(mi));
@@ -561,7 +550,7 @@ dist: `${easyMi} mi`,
 miles: easyMi,
 feel: “Conversational”
 }, {
-label: “6× Strides”,
+label: “6x Strides”,
 pace: “Mile effort”,
 dist: “~1 mi total (20s on / 90s walk)”,
 miles: 1,
@@ -575,7 +564,7 @@ label: “Easy Long Run”,
 type: “E”,
 color: “#38bdf8”,
 desc: “Longer easy run. Build aerobic base at purely conversational effort.”,
-scienceNote: “On weeks where both quality slots are easy (Week 1 base, all easy recovery weeks), the Sunday long run provides aerobic stimulus through duration rather than intensity. Glycogen efficiency improves with time-on-feet regardless of pace — you’re training fat oxidation and improving cardiac stroke volume without creating lactate stress. This is particularly valuable on peak lifting weeks where recovery capacity is at a premium.”,
+scienceNote: “On weeks where both quality slots are easy (Week 1 base, all easy recovery weeks), the Sunday long run provides aerobic stimulus through duration rather than intensity. Glycogen efficiency improves with time-on-feet regardless of pace – you’re training fat oxidation and improving cardiac stroke volume without creating lactate stress. This is particularly valuable on peak lifting weeks where recovery capacity is at a premium.”,
 getSegs: (p, mi) => [{
 label: “Full Run”,
 pace: p.E,
@@ -589,8 +578,8 @@ long_late_pickup: {
 label: “Long Run + Late Pickup”,
 type: “E/M”,
 color: “#a78bfa”,
-desc: “Long easy run finishing with 3–4 miles at marathon pace.”,
-scienceNote: “The late pickup is physiologically distinct from a fresh MP run. After 12+ easy miles, glycogen stores are partially depleted and fat oxidation is elevated. Switching to marathon pace in this metabolically stressed state trains the exact transition your body must execute in miles 18–26 of a marathon. You’re teaching race-pace mechanics and fat/carbohydrate blending under conditions that match late-race physiology — arguably the most specific marathon adaptation you can create in training.”,
+desc: “Long easy run finishing with 3-4 miles at marathon pace.”,
+scienceNote: “The late pickup is physiologically distinct from a fresh MP run. After 12+ easy miles, glycogen stores are partially depleted and fat oxidation is elevated. Switching to marathon pace in this metabolically stressed state trains the exact transition your body must execute in miles 18-26 of a marathon. You’re teaching race-pace mechanics and fat/carbohydrate blending under conditions that match late-race physiology – arguably the most specific marathon adaptation you can create in training.”,
 getSegs: (p, mi) => {
 const totalMi = Math.min(18, Math.max(1, Math.round(mi)));
 const pickup = Math.min(4, Math.max(1, Math.round(totalMi * 0.25)));
@@ -606,7 +595,7 @@ label: “Late Pickup”,
 pace: p.M,
 dist: `${pickup} mi`,
 miles: pickup,
-feel: “Marathon pace — controlled”
+feel: “Marathon pace – controlled”
 }];
 },
 getTotalMiles: mi => Math.min(18, Math.max(1, Math.round(mi)))
@@ -615,7 +604,7 @@ T_broken: {
 label: “Broken Threshold”,
 type: “T”,
 color: “#fbbf24”,
-desc: “Multiple tempo pieces with easy jog recovery. Comfortably hard — short phrases OK, not full sentences.”,
+desc: “Multiple tempo pieces with easy jog recovery. Comfortably hard – short phrases OK, not full sentences.”,
 scienceNote: “Broken T runs allow you to accumulate more total time at lactate threshold than a single continuous effort. Threshold pace (~1-hour race pace) is the fastest pace at which lactate production equals clearance. Each piece pushes lactate to equilibrium; the recovery jog brings it back down slightly without full recovery, repeatedly stressing the lactate clearance system. This produces greater adaptation in lactate transporters and mitochondrial enzyme activity than one long continuous T run of the same volume.”,
 getSegs: p => [{
 label: “Warm-up”,
@@ -666,8 +655,8 @@ T_long_broken: {
 label: “Long Broken Threshold”,
 type: “T”,
 color: “#fbbf24”,
-desc: “Longer broken threshold — 3+3 miles of T pace with recovery jog.”,
-scienceNote: “Week 4 T workouts use a longer broken structure (3+3 vs 2+2+1). By this point in the block your lactate threshold machinery is better conditioned, so you can sustain more total threshold exposure. The 3-mile pieces create longer continuous exposure to lactate equilibrium — driving greater adaptations in MCT4 lactate transporters and complex I/II mitochondrial enzyme activity. This is a more advanced stimulus that directly raises the velocity at lactate threshold.”,
+desc: “Longer broken threshold – 3+3 miles of T pace with recovery jog.”,
+scienceNote: “Week 4 T workouts use a longer broken structure (3+3 vs 2+2+1). By this point in the block your lactate threshold machinery is better conditioned, so you can sustain more total threshold exposure. The 3-mile pieces create longer continuous exposure to lactate equilibrium – driving greater adaptations in MCT4 lactate transporters and complex I/II mitochondrial enzyme activity. This is a more advanced stimulus that directly raises the velocity at lactate threshold.”,
 getSegs: p => [{
 label: “Warm-up”,
 pace: p.E,
@@ -705,8 +694,8 @@ T_track: {
 label: “Track Threshold”,
 type: “T”,
 color: “#fbbf24”,
-desc: “5× 1-mile repeats at threshold pace with 90-second recovery jogs.”,
-scienceNote: “Track T workouts leverage precise distance for consistent pacing and execution. 1-mile repeats at T pace are long enough to create meaningful lactate stress but short enough to recover between reps — allowing 5 miles of threshold work with uniform quality. Daniels recommends track T sessions later in training blocks when athletes are better conditioned to manage the precision required. The track surface also reduces mechanical variability, making split-to-split data more useful for VDOT assessment.”,
+desc: “5x 1-mile repeats at threshold pace with 90-second recovery jogs.”,
+scienceNote: “Track T workouts leverage precise distance for consistent pacing and execution. 1-mile repeats at T pace are long enough to create meaningful lactate stress but short enough to recover between reps – allowing 5 miles of threshold work with uniform quality. Daniels recommends track T sessions later in training blocks when athletes are better conditioned to manage the precision required. The track surface also reduces mechanical variability, making split-to-split data more useful for VDOT assessment.”,
 getSegs: p => [{
 label: “Warm-up”,
 pace: p.E,
@@ -714,7 +703,7 @@ dist: “2 mi”,
 miles: 2,
 feel: “Easy”
 }, {
-label: “5× 1mi @ T”,
+label: “5x 1mi @ T”,
 pace: p.T,
 dist: “5 mi (1 mi each)”,
 miles: 5,
@@ -738,8 +727,8 @@ M_long: {
 label: “Long MP Run”,
 type: “M”,
 color: “#e2ff5d”,
-desc: “Sustained 8–12 miles at marathon pace. The most important workout in the program.”,
-scienceNote: “This is the cornerstone of marathon preparation. Sustained MP running trains the specific metabolic adaptations needed for race day: fat oxidation at race pace, lactate clearance at marathon intensity, cardiovascular efficiency at marathon HR, and neuromuscular groove for race-specific biomechanics. Unlike threshold work you’re not exceeding lactate equilibrium — you’re building capacity to sustain the exact metabolic state of a sub-3 marathon for 26.2 miles. No other workout is more race-specific.”,
+desc: “Sustained 8-12 miles at marathon pace. The most important workout in the program.”,
+scienceNote: “This is the cornerstone of marathon preparation. Sustained MP running trains the specific metabolic adaptations needed for race day: fat oxidation at race pace, lactate clearance at marathon intensity, cardiovascular efficiency at marathon HR, and neuromuscular groove for race-specific biomechanics. Unlike threshold work you’re not exceeding lactate equilibrium – you’re building capacity to sustain the exact metabolic state of a sub-3 marathon for 26.2 miles. No other workout is more race-specific.”,
 getSegs: (p, mi) => {
 const totalMi = Math.min(18, Math.max(1, Math.round(mi)));
 const wu = 2;
@@ -756,7 +745,7 @@ label: “MP Block”,
 pace: p.M,
 dist: `${mp} mi`,
 miles: mp,
-feel: “Marathon pace — controlled race effort”
+feel: “Marathon pace – controlled race effort”
 }, {
 label: “Cool-down”,
 pace: p.E,
@@ -772,7 +761,7 @@ label: “Broken MP”,
 type: “M”,
 color: “#e2ff5d”,
 desc: “Two 4-mile marathon pace blocks with a short recovery jog between.”,
-scienceNote: “Broken MP delivers similar cardiovascular stimulus to the long MP run but with a recovery reset that reduces perceived effort — allowing better mechanical form through both blocks. Heart rate stays elevated through the short recovery jog, so the cardiac training effect is nearly identical to continuous MP. Daniels considers broken workouts ~90% as effective as continuous runs at the same intensity, making this an ideal second quality session when cumulative weekly fatigue is higher.”,
+scienceNote: “Broken MP delivers similar cardiovascular stimulus to the long MP run but with a recovery reset that reduces perceived effort – allowing better mechanical form through both blocks. Heart rate stays elevated through the short recovery jog, so the cardiac training effect is nearly identical to continuous MP. Daniels considers broken workouts ~90% as effective as continuous runs at the same intensity, making this an ideal second quality session when cumulative weekly fatigue is higher.”,
 getSegs: p => [{
 label: “Warm-up”,
 pace: p.E,
@@ -1000,26 +989,26 @@ runDef: sunRun.def
 
 // ─── LIFT SESSIONS ─────────────────────────────────────────────────────────────
 const LIFT_SCIENCE = {
-pull: “Pull day targets lats and elbow flexors. Pull-ups are first when you’re freshest — highest neuromuscular demand, best carryover to lat width. Rows follow for mid-back thickness (rhomboids, middle traps) that pull-ups underload. Curls last when biceps are pre-fatigued from compound pulling, increasing relative stimulus without adding absolute load. On Week 4 (peak intensity), target 0 RIR — you have the most recovery capacity available because running is at its lightest.”,
-push: “Push day hits upper chest and deltoids first when you’re strongest. Incline movements are prioritized over flat pressing for hybrid athletes — the angle reduces shoulder impingement risk from cumulative overhead running stress and builds the upper chest/anterior deltoid. Lateral raises placed after pressing pre-exhaust the medial deltoid for the overhead extension sets. The lifting intensity ramps across the 4-week block inverse to running load.”,
-legs: “Leg day is quad-dominant, deliberately. Front squats over back squats for hybrid athletes: upright torso reduces spinal load when you’re accumulating running stress, while maximizing quad recruitment. RDLs provide hinge pattern and posterior chain work. Bulgarians are placed after bilateral work — more specific to running’s single-leg mechanics and expose asymmetries that bilateral squats mask. On Week 4 (0 RIR), push Bulgarian depth and load since running is easy this week.”,
-sharms: “Saturday Shoulders & Arms uses a lower systemic profile, deliberately — you’ve run easy that morning and have a quality run Sunday. Shoulder pressing is first so the primary mover isn’t pre-fatigued. Bicep/tricep work uses antagonistic pairings — curl then overhead extension — maintaining elbow blood flow and reducing rest time. This session is intentionally submaximal to protect Sunday’s quality run.”
+pull: “Pull day targets lats and elbow flexors. Pull-ups are first when you’re freshest – highest neuromuscular demand, best carryover to lat width. Rows follow for mid-back thickness (rhomboids, middle traps) that pull-ups underload. Curls last when biceps are pre-fatigued from compound pulling, increasing relative stimulus without adding absolute load. On Week 4 (peak intensity), target 0 RIR – you have the most recovery capacity available because running is at its lightest.”,
+push: “Push day hits upper chest and deltoids first when you’re strongest. Incline movements are prioritized over flat pressing for hybrid athletes – the angle reduces shoulder impingement risk from cumulative overhead running stress and builds the upper chest/anterior deltoid. Lateral raises placed after pressing pre-exhaust the medial deltoid for the overhead extension sets. The lifting intensity ramps across the 4-week block inverse to running load.”,
+legs: “Leg day is quad-dominant, deliberately. Front squats over back squats for hybrid athletes: upright torso reduces spinal load when you’re accumulating running stress, while maximizing quad recruitment. RDLs provide hinge pattern and posterior chain work. Bulgarians are placed after bilateral work – more specific to running’s single-leg mechanics and expose asymmetries that bilateral squats mask. On Week 4 (0 RIR), push Bulgarian depth and load since running is easy this week.”,
+sharms: “Saturday Shoulders & Arms uses a lower systemic profile, deliberately – you’ve run easy that morning and have a quality run Sunday. Shoulder pressing is first so the primary mover isn’t pre-fatigued. Bicep/tricep work uses antagonistic pairings – curl then overhead extension – maintaining elbow blood flow and reducing rest time. This session is intentionally submaximal to protect Sunday’s quality run.”
 };
 const LIFT_EX_NOTES = {
-“Pull-Ups”: “First when fresh — highest neuromuscular demand, best carryover to lat width. BW = lower load on peak running weeks.”,
+“Pull-Ups”: “First when fresh – highest neuromuscular demand, best carryover to lat width. BW = lower load on peak running weeks.”,
 “Row”: “Horizontal pull balances the vertical pull-up. Targets mid-back thickness (rhomboids, mid-traps) that pull-ups underload.”,
 “Neutral Grip Pulldown”: “Neutral grip reduces wrist/elbow stress. Drop set extends time under tension without adding systemic fatigue.”,
 “EZ-Bar Curl”: “EZ bar reduces wrist supination stress. Compound bicep lift first when freshest from compound pulling.”,
-“Incline DB Curl”: “Incline stretches the bicep at the bottom — peak stretch = peak mechanical tension = superior hypertrophic stimulus.”,
+“Incline DB Curl”: “Incline stretches the bicep at the bottom – peak stretch = peak mechanical tension = superior hypertrophic stimulus.”,
 “Smith Machine Incline”: “Smith removes stabilization demand, letting you focus entirely on pec/delt recruitment. Safer heavy incline work without a spotter.”,
-“Incline DB Press”: “Post-Smith, DBs allow full retraction and greater stretch at the bottom — targeting upper chest fibers the Smith position partially cuts off.”,
-“DB Lateral Raise”: “Most direct medial deltoid stimulus. Drop set on set 3 keeps TUT high — medial delts respond well to volume.”,
-“Rope Overhead Ext”: “Overhead position maximally stretches the long head of the tricep — the largest head, most responsive to stretch-focused loading.”,
+“Incline DB Press”: “Post-Smith, DBs allow full retraction and greater stretch at the bottom – targeting upper chest fibers the Smith position partially cuts off.”,
+“DB Lateral Raise”: “Most direct medial deltoid stimulus. Drop set on set 3 keeps TUT high – medial delts respond well to volume.”,
+“Rope Overhead Ext”: “Overhead position maximally stretches the long head of the tricep – the largest head, most responsive to stretch-focused loading.”,
 “Straight Pushdown”: “Lateral head-dominant. Paired with overhead ext to hit all three heads across both exercises.”,
 “Front Squat”: “Upright torso = lower spinal load. Higher quad recruitment than back squat. Better choice when managing cumulative running fatigue.”,
-“RDL”: “Constant hamstring tension through ROM — superior hypertrophic stimulus vs conventional deadlift. Trains hamstrings in the lengthened position.”,
+“RDL”: “Constant hamstring tension through ROM – superior hypertrophic stimulus vs conventional deadlift. Trains hamstrings in the lengthened position.”,
 “Bulgarian Split Squat”: “Unilateral loading exposes asymmetries. Specific to running’s single-leg mechanics. High quad/glute stimulus per set.”,
-“Hyperextensions”: “Trains spinal erectors and glutes at long muscle lengths — complementary to RDLs which train them shortened. Low spinal load.”,
+“Hyperextensions”: “Trains spinal erectors and glutes at long muscle lengths – complementary to RDLs which train them shortened. Low spinal load.”,
 “Shoulder Press”: “Overhead press before laterals so the primary mover (anterior/medial delt) isn’t pre-fatigued going into the main lift.”
 };
 const LIFTS = {
@@ -1030,31 +1019,31 @@ scienceKey: “pull”,
 exercises: [{
 name: “Pull-Ups”,
 sets: 4,
-repRange: “5–8”,
+repRange: “5-8”,
 rir: 3,
 notes: “”
 }, {
 name: “Row”,
 sets: 3,
-repRange: “8–12”,
+repRange: “8-12”,
 rir: 3,
 notes: “”
 }, {
 name: “Neutral Grip Pulldown”,
 sets: 2,
-repRange: “10–15”,
+repRange: “10-15”,
 rir: 3,
 notes: “Drop second set”
 }, {
 name: “EZ-Bar Curl”,
 sets: 3,
-repRange: “10–15”,
+repRange: “10-15”,
 rir: 3,
 notes: “”
 }, {
 name: “Incline DB Curl”,
 sets: 3,
-repRange: “10–15”,
+repRange: “10-15”,
 rir: 3,
 notes: “Myorep third set”
 }]
@@ -1066,31 +1055,31 @@ scienceKey: “push”,
 exercises: [{
 name: “Smith Machine Incline”,
 sets: 3,
-repRange: “8–12”,
+repRange: “8-12”,
 rir: 3,
 notes: “”
 }, {
 name: “Incline DB Press”,
 sets: 2,
-repRange: “10–15”,
+repRange: “10-15”,
 rir: 3,
 notes: “”
 }, {
 name: “DB Lateral Raise”,
 sets: 3,
-repRange: “15–20”,
+repRange: “15-20”,
 rir: 3,
 notes: “Drop third set”
 }, {
 name: “Rope Overhead Ext”,
 sets: 3,
-repRange: “10–15”,
+repRange: “10-15”,
 rir: 3,
 notes: “”
 }, {
 name: “Straight Pushdown”,
 sets: 3,
-repRange: “12–20”,
+repRange: “12-20”,
 rir: 3,
 notes: “Myorep third set”
 }]
@@ -1102,25 +1091,25 @@ scienceKey: “legs”,
 exercises: [{
 name: “Front Squat”,
 sets: 3,
-repRange: “6–10”,
+repRange: “6-10”,
 rir: 3,
 notes: “”
 }, {
 name: “RDL”,
 sets: 3,
-repRange: “8–12”,
+repRange: “8-12”,
 rir: 3,
 notes: “”
 }, {
 name: “Bulgarian Split Squat”,
 sets: 3,
-repRange: “10–12”,
+repRange: “10-12”,
 rir: 3,
 notes: “”
 }, {
 name: “Hyperextensions”,
 sets: 3,
-repRange: “12–15”,
+repRange: “12-15”,
 rir: 3,
 notes: “”
 }]
@@ -1132,37 +1121,37 @@ scienceKey: “sharms”,
 exercises: [{
 name: “Shoulder Press”,
 sets: 3,
-repRange: “8–12”,
+repRange: “8-12”,
 rir: 3,
 notes: “”
 }, {
 name: “DB Lateral Raise”,
 sets: 3,
-repRange: “15–20”,
+repRange: “15-20”,
 rir: 3,
 notes: “Drop third set”
 }, {
 name: “EZ-Bar Curl”,
 sets: 3,
-repRange: “10–15”,
+repRange: “10-15”,
 rir: 3,
 notes: “”
 }, {
 name: “Rope Overhead Ext”,
 sets: 3,
-repRange: “10–15”,
+repRange: “10-15”,
 rir: 3,
 notes: “”
 }, {
 name: “Incline DB Curl”,
 sets: 2,
-repRange: “10–15”,
+repRange: “10-15”,
 rir: 3,
 notes: “Myorep second set”
 }, {
 name: “Straight Pushdown”,
 sets: 2,
-repRange: “12–20”,
+repRange: “12-20”,
 rir: 3,
 notes: “Myorep second set”
 }]
@@ -1171,31 +1160,31 @@ notes: “Myorep second set”
 const FEEL = [{
 v: 1,
 label: “Terrible”,
-e: “💀”
+e: “\u1f480”
 }, {
 v: 2,
 label: “Very Hard”,
-e: “😤”
+e: “\u1f624”
 }, {
 v: 3,
 label: “Hard”,
-e: “😓”
+e: “\u1f613”
 }, {
 v: 4,
 label: “OK”,
-e: “😐”
+e: “\u1f610”
 }, {
 v: 5,
 label: “Good”,
-e: “😊”
+e: “\u1f60a”
 }, {
 v: 6,
 label: “Strong”,
-e: “💪”
+e: “\u1f4aa”
 }, {
 v: 7,
 label: “Easy”,
-e: “🟢”
+e: “\u1f7e2”
 }];
 
 // ─── STORAGE ──────────────────────────────────────────────────────────────────
@@ -1241,11 +1230,11 @@ const lastVol = last.sets.reduce((s, r) => s + (parseFloat(r.reps) || 0) * (pars
 const prevVol = prev.sets.reduce((s, r) => s + (parseFloat(r.reps) || 0) * (parseFloat(r.weight) || 0), 0);
 if (avgRir <= 1.5) return {
 kind: “go”,
-msg: `Avg RIR ${avgRir.toFixed(1)} — consider increasing weight or reps`
+msg: `Avg RIR ${avgRir.toFixed(1)} -- consider increasing weight or reps`
 };
 if (lastVol > 0 && lastVol < prevVol * 0.92) return {
 kind: “warn”,
-msg: “Volume dropped vs last session — check fatigue”
+msg: “Volume dropped vs last session – check fatigue”
 };
 return null;
 }
@@ -1712,7 +1701,7 @@ fontWeight: 600,
 width: “100%”,
 cursor: “pointer”
 }
-}, Ic.flask(), “ The Science “, open ? “▲” : “▼”), open && /*#**PURE***/React.createElement(“div”, {
+}, Ic.flask(), “ The Science “, open ? “\u25b2” : “\u25bc”), open && /*#**PURE***/React.createElement(“div”, {
 style: {
 background: “#111208”,
 border: “1px solid rgba(214,255,75,0.15)”,
@@ -2173,7 +2162,7 @@ distance: dist,
 completed: true,
 date: todayStr()
 });
-const isKey = l => [“Piece”, “Blk”, “MP”, “Pickup”, “×”, “Tempo”, “Strides”].some(k => l.includes(k));
+const isKey = l => [“Piece”, “Blk”, “MP”, “Pickup”, “x”, “Tempo”, “Strides”].some(k => l.includes(k));
 return /*#**PURE***/React.createElement(“div”, {
 style: {
 position: “fixed”,
@@ -2291,7 +2280,7 @@ border: “1px solid “ + hexAlpha(tc,0.18),
 marginBottom: 12
 }
 }, /*#**PURE***/React.createElement(ST, {
-c: `Paces — VDOT ${vdot}`
+c: `Paces -- VDOT ${vdot}`
 }), /*#**PURE***/React.createElement(“div”, {
 style: {
 display: “grid”,
@@ -2768,7 +2757,7 @@ fontSize: 11,
 fontFamily: “Syne,sans-serif”,
 cursor: “pointer”
 }
-}, isCurrent ? “Current week” : “→ Current week”), /*#**PURE***/React.createElement(Btn, {
+}, isCurrent ? “Current week” : “-> Current week”), /*#**PURE***/React.createElement(Btn, {
 v: “ghost”,
 onClick: () => dispatch({
 type: “VIEW_WEEK”,
@@ -3088,7 +3077,7 @@ color: “var(–t3)”
 }
 }, LIFT_INTENSITY_LABEL[w]));
 }))), /*#**PURE***/React.createElement(Card, null, /*#**PURE***/React.createElement(ST, {
-c: `Paces — VDOT ${vdot}`
+c: `Paces -- VDOT ${vdot}`
 }), /*#**PURE***/React.createElement(“div”, {
 style: {
 display: “grid”,
@@ -3976,7 +3965,7 @@ const now = new Date().toLocaleString();
 localStorage.setItem("stravaLastSync", now);
 setLastSync(now);
 setSyncing(false);
-setSyncMsg(`Done — ${imported} new runs imported. Reload to see them.`);
+setSyncMsg(`Done -- ${imported} new runs imported. Reload to see them.`);
 ```
 
 }
@@ -4137,7 +4126,7 @@ dispatch: dispatch
 ReactDOM.createRoot(document.getElementById(“root”)).render(React.createElement(App));
 
 ReactDOM.createRoot(document.getElementById(“root”)).render(React.createElement(App));
-} catch(e) {
+}catch(e){
 document.getElementById(‘root’).innerHTML=’<div style="padding:30px;font-family:monospace;color:#f87171;background:#080809;min-height:100vh"><b>Startup Error</b><br><br>’+(e&&e.message||String(e))+’<br><br><small style="color:#5a5a64;word-break:break-all">’+(e&&e.stack||’’)+’</small></div>’;
 }
 </script>
