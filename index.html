@@ -75,6 +75,23 @@ if (code) { await StravaAuth.handleCallback(code); window.location.replace(STRAV
 <script>
 const { useState, useReducer, useMemo, useEffect } = React;
 
+// ─── COLOR HELPER (replaces color-mix for Safari compat) ─────────────────────
+function hexAlpha(hex, alpha) {
+if (!hex || hex.startsWith(‘var(’)) {
+return ‘rgba(128,128,128,’ + alpha + ‘)’;
+}
+// Handle named css vars that slipped through
+const map = {
+‘#38bdf8’: [56,189,248], ‘#fbbf24’: [251,191,36], ‘#e2ff5d’: [226,255,93],
+‘#fb923c’: [251,146,60], ‘#a78bfa’: [167,139,250], ‘#f472b6’: [244,114,182],
+‘#60a5fa’: [96,165,250], ‘#f87171’: [248,113,113], ‘#4ade80’: [74,222,128],
+‘#d6ff4b’: [214,255,75], ‘#fc4c02’: [252,76,2],
+};
+const rgb = map[hex];
+if (rgb) return ‘rgba(’ + rgb[0] + ‘,’ + rgb[1] + ‘,’ + rgb[2] + ‘,’ + alpha + ‘)’;
+return ‘rgba(128,128,128,’ + alpha + ‘)’;
+}
+
 function StravaPanel() {
 const [tokens, setTokens] = React.useState(() => StravaAuth.getTokens());
 const [syncing, setSyncing] = React.useState(false);
@@ -117,7 +134,7 @@ setSyncMsg(“Done — “+imported+” new runs imported. Reload to see them.�
 const orange=”#fc4c02”;
 const sIcon = React.createElement(“svg”,{width:18,height:18,viewBox:“0 0 24 24”,fill:“white”},React.createElement(“path”,{d:“M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169”}));
 
-return React.createElement(“div”,{style:{background:“color-mix(in srgb,#fc4c02 6%,#0f0f11)”,border:“1px solid color-mix(in srgb,#fc4c02 20%,transparent)”,borderRadius:14,padding:16,marginBottom:12}},
+return React.createElement(“div”,{style:{background:”#141009”,border:“1px solid rgba(252,76,2,0.20)”,borderRadius:14,padding:16,marginBottom:12}},
 React.createElement(“div”,{style:{fontSize:10,fontWeight:700,letterSpacing:“0.12em”,textTransform:“uppercase”,color:”#5a5a64”,marginBottom:10}},“Strava”),
 connected
 ? React.createElement(“div”,null,
@@ -1563,7 +1580,7 @@ alignItems: “center”,
 gap: 4,
 padding: sm ? “2px 7px” : “3px 10px”,
 borderRadius: 20,
-background: `color-mix(in srgb,${color} 14%,transparent)`,
+background: hexAlpha(color,0.14),
 color,
 fontSize: sm ? 10 : 11,
 fontWeight: 600,
@@ -1593,9 +1610,9 @@ background: “var(–s3)”,
 color: “var(–t1)”
 },
 ok: {
-background: “color-mix(in srgb,var(–ok) 15%,transparent)”,
+background: “rgba(74,222,128,0.15)”,
 color: “var(–ok)”,
-border: “1px solid color-mix(in srgb,var(–ok) 30%,transparent)”
+border: “1px solid rgba(74,222,128,0.30)”
 }
 };
 return /*#**PURE***/React.createElement(“button”, {
@@ -1684,8 +1701,8 @@ style: {
 display: “flex”,
 alignItems: “center”,
 gap: 6,
-background: “color-mix(in srgb,var(–accent) 8%,var(–s1))”,
-border: “1px solid color-mix(in srgb,var(–accent) 22%,transparent)”,
+background: “#111309”,
+border: “1px solid rgba(214,255,75,0.22)”,
 borderRadius: open ? “var(–r2) var(–r2) 0 0” : “var(–r2)”,
 padding: “8px 12px”,
 color: “var(–acc2)”,
@@ -1696,8 +1713,8 @@ cursor: “pointer”
 }
 }, Ic.flask(), “ The Science “, open ? “▲” : “▼”), open && /*#**PURE***/React.createElement(“div”, {
 style: {
-background: “color-mix(in srgb,var(–accent) 5%,var(–s1))”,
-border: “1px solid color-mix(in srgb,var(–accent) 15%,transparent)”,
+background: “#111208”,
+border: “1px solid rgba(214,255,75,0.15)”,
 borderTop: “none”,
 borderRadius: “0 0 var(–r2) var(–r2)”,
 padding: “12px 14px”
@@ -1724,8 +1741,8 @@ const [open, setOpen] = useState(false);
 if (dismissed) return null;
 return /*#**PURE***/React.createElement(“div”, {
 style: {
-background: “linear-gradient(135deg,color-mix(in srgb,var(–accent) 12%,var(–s1)),color-mix(in srgb,var(–ok) 8%,var(–s1)))”,
-border: “1px solid color-mix(in srgb,var(–accent) 35%,transparent)”,
+background: “linear-gradient(135deg,rgba(214,255,75,0.12),#0b1510)”,
+border: “1px solid rgba(214,255,75,0.35)”,
 borderRadius: “var(–r)”,
 padding: 16,
 marginBottom: 14
@@ -1897,8 +1914,8 @@ fontSize: 12
 }
 }, “Close”)), /*#**PURE***/React.createElement(“div”, {
 style: {
-background: `color-mix(in srgb,${LIFT_INTENSITY_COLOR[Math.ceil(4 - targetRir) || 1] || "var(--lift)"} 12%,var(--s1))`,
-border: `1px solid color-mix(in srgb,${LIFT_INTENSITY_COLOR[Math.ceil(4 - targetRir) || 1] || "var(--lift)"} 25%,transparent)`,
+background: hexAlpha(LIFT_INTENSITY_COLOR[Math.ceil(4 - targetRir) || 1] || “#fb923c”,0.12),
+border: `1px solid ${hexAlpha(LIFT_INTENSITY_COLOR[Math.ceil(4 - targetRir) || 1] || "#fb923c",0.25)}`,
 borderRadius: “var(–r2)”,
 padding: “10px 14px”,
 marginBottom: 12
@@ -1955,7 +1972,7 @@ marginLeft: 4
 }, filled, “/”, e.sets.length));
 })), /*#**PURE***/React.createElement(Card, {
 style: {
-border: `1px solid color-mix(in srgb,${def.color} 25%,transparent)`,
+border: `1px solid ${hexAlpha(def.color,0.25)}`,
 marginBottom: 10
 }
 }, /*#**PURE***/React.createElement(SB, {
@@ -2241,8 +2258,8 @@ marginTop: 2
 }
 }, seg.dist, “ \xB7 “, seg.feel))))), /*#**PURE***/React.createElement(Card, {
 style: {
-background: `color-mix(in srgb,${tc} 5%,var(--s1))`,
-border: `1px solid color-mix(in srgb,${tc} 18%,transparent)`,
+background: hexAlpha(tc,0.05),
+border: `1px solid ${hexAlpha(tc,0.18)}`,
 marginBottom: 12
 }
 }, /*#**PURE***/React.createElement(ST, {
@@ -2509,7 +2526,7 @@ marginBottom: 8
 }
 }, /*#**PURE***/React.createElement(“div”, {
 style: {
-background: `color-mix(in srgb,${def.color} 10%,var(--s3))`,
+background: hexAlpha(def.color,0.10),
 borderRadius: “var(–r2)”,
 padding: “8px 10px”
 }
@@ -2534,7 +2551,7 @@ color: def.color
 }
 }, targetMiles, “ mi \xB7 “, miSum, “ planned”)), /*#**PURE***/React.createElement(“div”, {
 style: {
-background: `color-mix(in srgb,${liftColor} 10%,var(--s3))`,
+background: hexAlpha(liftColor,0.10),
 borderRadius: “var(–r2)”,
 padding: “8px 10px”
 }
@@ -2608,8 +2625,8 @@ key: idx,
 onClick: () => setModal(item),
 style: {
 width: “100%”,
-background: done ? “color-mix(in srgb,var(–ok) 8%,var(–s1))” : “var(–s1)”,
-border: `1px solid ${done ? "color-mix(in srgb,var(--ok) 25%,transparent)" : isTdy ? "color-mix(in srgb,var(--accent) 40%,transparent)" : "var(--b1)"}`,
+background: done ? “#0b1510” : “var(–s1)”,
+border: `1px solid ${done ? "rgba(74,222,128,0.25)" : isTdy ? "rgba(214,255,75,0.40)" : "var(--b1)"}`,
 borderRadius: “var(–r)”,
 padding: “12px 14px”,
 marginBottom: 8,
@@ -2624,7 +2641,7 @@ style: {
 width: 36,
 height: 36,
 borderRadius: 10,
-background: `color-mix(in srgb,${color} 15%,transparent)`,
+background: hexAlpha(color,0.15),
 display: “flex”,
 alignItems: “center”,
 justifyContent: “center”,
@@ -2785,8 +2802,8 @@ setTab(“week”);
 },
 style: {
 width: “100%”,
-background: isActive ? `color-mix(in srgb,${wdef.color} 8%,var(--s1))` : “var(–s1)”,
-border: `1px solid ${isActive ? `color-mix(in srgb,${wdef.color} 30%,transparent)` : "var(--b1)"}`,
+background: isActive ? hexAlpha(wdef.color,0.08) : “var(–s1)”,
+border: `1px solid ${isActive ? hexAlpha(wdef.color,0.30) : "var(--b1)"}`,
 borderRadius: “var(–r)”,
 padding: 14,
 marginBottom: 10,
@@ -2802,7 +2819,7 @@ style: {
 width: 26,
 height: 26,
 borderRadius: 7,
-background: `color-mix(in srgb,${wdef.color} 20%,transparent)`,
+background: hexAlpha(wdef.color,0.20),
 display: “flex”,
 alignItems: “center”,
 justifyContent: “center”,
@@ -2840,7 +2857,7 @@ marginBottom: 8
 }
 }, /*#**PURE***/React.createElement(“div”, {
 style: {
-background: `color-mix(in srgb,${wdef.color} 8%,var(--s3))`,
+background: hexAlpha(wdef.color,0.08),
 borderRadius: “var(–r2)”,
 padding: “8px 10px”
 }
@@ -2872,7 +2889,7 @@ color: typeColor(q2d?.type)
 }
 }, q2d?.label)), /*#**PURE***/React.createElement(“div”, {
 style: {
-background: `color-mix(in srgb,${liftColor} 8%,var(--s3))`,
+background: hexAlpha(liftColor,0.08),
 borderRadius: “var(–r2)”,
 padding: “8px 10px”
 }
@@ -2977,7 +2994,7 @@ return /*#**PURE***/React.createElement(“div”, {
 key: wi,
 style: {
 flex: 1,
-background: isThisWeek ? `color-mix(in srgb,${wdef.color} 20%,var(--s2))` : “var(–s2)”,
+background: isThisWeek ? hexAlpha(wdef.color,0.20) : “var(–s2)”,
 border: isThisWeek ? `1px solid ${wdef.color}` : “1px solid var(–b1)”,
 borderRadius: 6,
 padding: “5px 4px”,
@@ -3060,8 +3077,8 @@ marginTop: 2
 }, h))))), /*#**PURE***/React.createElement(Card, {
 style: {
 marginTop: 10,
-background: “color-mix(in srgb,var(–accent) 5%,var(–s1))”,
-border: “1px solid color-mix(in srgb,var(–accent) 20%,transparent)”
+background: “#111208”,
+border: “1px solid rgba(214,255,75,0.20)”
 }
 }, /*#**PURE***/React.createElement(ST, {
 c: “Phase 1 Progress”
@@ -3523,8 +3540,8 @@ marginBottom: 20
 }
 }, “Settings”), flags.length > 0 && /*#**PURE***/React.createElement(Card, {
 style: {
-background: “color-mix(in srgb,var(–warn) 6%,var(–s1))”,
-border: “1px solid color-mix(in srgb,var(–warn) 25%,transparent)”,
+background: “#141109”,
+border: “1px solid rgba(251,191,36,0.25)”,
 marginBottom: 12
 }
 }, /*#**PURE***/React.createElement(Row, {
@@ -3661,7 +3678,7 @@ v: “ghost”,
 style: {
 fontSize: 12,
 color: “#fc4c02”,
-borderColor: “color-mix(in srgb,#fc4c02 30%,transparent)”
+borderColor: “rgba(252,76,2,0.30)”
 }
 }, Ic.strava(), “ Connect Strava”)));
 }
@@ -3852,8 +3869,8 @@ setSyncMsg(`Done — ${imported} new runs imported. Reload to see them.`);
 }
 return /*#**PURE***/React.createElement(“div”, {
 style: {
-background: “color-mix(in srgb,#fc4c02 6%,var(–s1))”,
-border: “1px solid color-mix(in srgb,#fc4c02 20%,transparent)”,
+background: “#141009”,
+border: “1px solid rgba(252,76,2,0.20)”,
 borderRadius: “var(–r)”,
 padding: 16,
 marginBottom: 12
